@@ -22,8 +22,9 @@ if [ ! -f .env ]; then
     echo "LOG_CHANNEL=stderr" >> .env
 fi
 
-# Run migrations
+# Run migrations and seed
 php artisan migrate --force
+php artisan db:seed --force
 
 # Cache config and routes for production
 php artisan config:cache
