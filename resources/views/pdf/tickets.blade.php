@@ -4,107 +4,128 @@
     <meta charset="utf-8">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #333; }
-        .ticket { page-break-after: always; padding: 30px; }
+        body { font-family: DejaVu Sans Mono, monospace; font-size: 10px; color: #000; width: 100%; }
+        .ticket { padding: 10px 5px; page-break-after: always; }
         .ticket:last-child { page-break-after: auto; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #7c3bed; padding-bottom: 15px; }
-        .header h1 { font-size: 20px; color: #7c3bed; margin-bottom: 4px; }
-        .header p { font-size: 10px; color: #666; }
-        .ticket-info { display: table; width: 100%; margin-bottom: 15px; }
-        .ticket-info .left, .ticket-info .right { display: table-cell; width: 50%; }
-        .ticket-info .right { text-align: right; }
-        .ticket-info p { margin-bottom: 3px; font-size: 11px; }
-        .ticket-info .label { color: #888; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        th { background: #7c3bed; color: white; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        th:last-child { text-align: right; }
-        td { padding: 8px 10px; border-bottom: 1px solid #eee; }
-        td:last-child { text-align: right; }
-        .totals { width: 250px; margin-left: auto; }
-        .totals .row { display: table; width: 100%; margin-bottom: 4px; }
-        .totals .row .label, .totals .row .value { display: table-cell; }
-        .totals .row .value { text-align: right; }
-        .totals .row.total { border-top: 2px solid #7c3bed; padding-top: 8px; margin-top: 8px; font-size: 14px; font-weight: bold; color: #7c3bed; }
-        .totals .row.discount .value { color: #e53e3e; }
-        .seller { margin-top: 20px; padding-top: 10px; border-top: 1px solid #eee; font-size: 10px; color: #888; }
-        .footer { text-align: center; margin-top: 30px; font-size: 9px; color: #aaa; }
+
+        .center { text-align: center; }
+        .right { text-align: right; }
+        .bold { font-weight: bold; }
+
+        .shop-name { font-size: 16px; font-weight: bold; border: 2px solid #000; padding: 6px 12px; display: inline-block; margin: 8px 0; }
+
+        .header { text-align: center; margin-bottom: 10px; }
+        .header p { font-size: 9px; margin-bottom: 1px; }
+
+        .separator { border-top: 1px dashed #000; margin: 8px 0; }
+        .separator-double { border-top: 2px solid #000; margin: 8px 0; }
+
+        .info-row { width: 100%; margin-bottom: 2px; }
+        .info-row td { font-size: 10px; }
+        .info-row .label { text-align: left; }
+        .info-row .value { text-align: right; }
+
+        .items { width: 100%; border-collapse: collapse; }
+        .items td { padding: 3px 0; font-size: 10px; vertical-align: top; }
+        .items .code { width: 50px; }
+        .items .desc { }
+        .items .price { text-align: right; width: 70px; }
+
+        .totals { width: 100%; border-collapse: collapse; }
+        .totals td { padding: 2px 0; font-size: 10px; }
+        .totals .total-row td { font-size: 13px; font-weight: bold; padding-top: 6px; }
+
+        .footer { text-align: center; margin-top: 12px; font-size: 8px; color: #555; }
     </style>
 </head>
 <body>
     @foreach($tickets as $ticket)
     <div class="ticket">
+        {{-- Cabecera empresa --}}
         <div class="header">
-            <h1>{{ $business['name'] }}</h1>
-            @if($business['cif'])
-                <p>CIF: {{ $business['cif'] }}</p>
-            @endif
             @if($business['address'])
                 <p>{{ $business['address'] }}</p>
             @endif
             @if($business['phone'])
                 <p>Tel: {{ $business['phone'] }}</p>
             @endif
+
+            <div class="shop-name">{{ $business['name'] }}</div>
+
+            @if($business['cif'])
+                <p>CIF: {{ $business['cif'] }}</p>
+            @endif
         </div>
 
-        <div class="ticket-info">
-            <div class="left">
-                <p class="label">Ticket</p>
-                <p><strong>#{{ $ticket->id }}</strong></p>
-            </div>
-            <div class="right">
-                <p class="label">Fecha</p>
-                <p>{{ $ticket->created_at->format('d/m/Y H:i') }}</p>
-            </div>
-        </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Cant.</th>
-                    <th>P. Unit.</th>
-                    <th>Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($ticket->items as $item)
-                <tr>
-                    <td>{{ $item->product?->name ?? 'Producto eliminado' }}</td>
-                    <td>{{ $item->quantity }}</td>
-                    <td>&euro; {{ number_format($item->unit_price, 2, ',', '.') }}</td>
-                    <td>&euro; {{ number_format($item->subtotal, 2, ',', '.') }}</td>
-                </tr>
-                @endforeach
-            </tbody>
+        {{-- Fecha y ticket --}}
+        <table class="info-row" style="width:100%">
+            <tr>
+                <td class="label">{{ $ticket->created_at->format('D') }}&nbsp;&nbsp;{{ $ticket->created_at->format('d/m/Y') }}&nbsp;&nbsp;{{ $ticket->created_at->format('H:i') }}</td>
+            </tr>
         </table>
 
-        <div class="totals">
-            <div class="row">
-                <span class="label">Subtotal</span>
-                <span class="value">&euro; {{ number_format($ticket->subtotal, 2, ',', '.') }}</span>
-            </div>
+        <div class="separator"></div>
+
+        {{-- Productos --}}
+        <table class="items">
+            @foreach($ticket->items as $item)
+            <tr>
+                <td class="code">{{ $item->product?->code ?? '---' }}</td>
+                <td class="desc">{{ $item->product?->name ?? 'Producto' }} x {{ $item->quantity }}</td>
+                <td class="price">&euro;{{ number_format($item->subtotal, 2, ',', '.') }}</td>
+            </tr>
+            @endforeach
+        </table>
+
+        <div class="separator"></div>
+
+        {{-- Totales --}}
+        <table class="totals">
+            <tr>
+                <td>Subtotal</td>
+                <td class="right">&euro;{{ number_format($ticket->subtotal, 2, ',', '.') }}</td>
+            </tr>
             @if($ticket->discount_value > 0)
-            <div class="row discount">
-                <span class="label">Descuento</span>
-                <span class="value">-&euro; {{ number_format($ticket->discount_value, 2, ',', '.') }}</span>
-            </div>
+            <tr>
+                <td>Descuento</td>
+                <td class="right">-&euro;{{ number_format($ticket->discount_value, 2, ',', '.') }}</td>
+            </tr>
             @endif
-            <div class="row">
-                <span class="label">IVA ({{ $ticket->tax_rate }}%)</span>
-                <span class="value">&euro; {{ number_format($ticket->tax_amount, 2, ',', '.') }}</span>
-            </div>
-            <div class="row total">
-                <span class="label">TOTAL</span>
-                <span class="value">&euro; {{ number_format($ticket->total, 2, ',', '.') }}</span>
-            </div>
-        </div>
+            <tr>
+                <td>IVA ({{ $ticket->tax_rate }}%)</td>
+                <td class="right">&euro;{{ number_format($ticket->tax_amount, 2, ',', '.') }}</td>
+            </tr>
+        </table>
 
-        <div class="seller">
-            Vendedor: {{ $ticket->user?->name ?? 'Usuario' }}
-        </div>
+        <div class="separator-double"></div>
 
+        <table class="totals">
+            <tr class="total-row">
+                <td>TOTAL:</td>
+                <td class="right">&euro;{{ number_format($ticket->total, 2, ',', '.') }}</td>
+            </tr>
+        </table>
+
+        <div class="separator"></div>
+
+        {{-- Info adicional --}}
+        <table class="info-row" style="width:100%">
+            <tr>
+                <td class="label">Vendedor:</td>
+                <td class="value">{{ $ticket->user?->name ?? 'Usuario' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Ticket #</td>
+                <td class="value">{{ $ticket->id }}</td>
+            </tr>
+        </table>
+
+        <div class="separator"></div>
+
+        {{-- Pie --}}
         <div class="footer">
-            Gracias por su compra &bull; {{ $business['name'] }}
+            <p>Gracias por su compra</p>
+            <p>{{ $business['name'] }}</p>
         </div>
     </div>
     @endforeach

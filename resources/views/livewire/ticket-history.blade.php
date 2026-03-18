@@ -57,11 +57,6 @@
                 <span class="material-symbols-outlined text-sm">download</span>
                 PDF
             </a>
-            <a href="{{ $this->getShareWhatsappUrl() }}" target="_blank"
-                class="h-8 px-3 rounded-lg bg-[#25D366]/20 text-[#25D366] text-xs font-bold flex items-center gap-1 hover:bg-[#25D366]/30 transition-all">
-                <span class="material-symbols-outlined text-sm">share</span>
-                WhatsApp
-            </a>
         </div>
     </div>
     @endif
@@ -193,15 +188,10 @@
 
             <!-- Actions -->
             <div class="flex gap-3 pt-2">
-                <a href="{{ $this->getWhatsappUrl($selectedTicket->id) }}" target="_blank"
-                    class="flex-1 h-12 rounded-xl bg-[#25D366]/20 border border-[#25D366]/30 text-[#25D366] font-semibold flex items-center justify-center gap-2 transition-all hover:bg-[#25D366]/30">
-                    <span class="material-symbols-outlined text-xl">share</span>
-                    WhatsApp
-                </a>
                 <a href="{{ route('tickets.export', ['ids' => $selectedTicket->id]) }}" target="_blank"
-                    class="flex-1 h-12 rounded-xl bg-white/5 border border-white/10 text-slate-200 font-semibold flex items-center justify-center gap-2 transition-all hover:bg-white/10">
+                    class="flex-1 h-12 rounded-xl bg-primary/20 border border-primary/30 text-primary font-semibold flex items-center justify-center gap-2 transition-all hover:bg-primary/30">
                     <span class="material-symbols-outlined text-xl">download</span>
-                    PDF
+                    Descargar PDF
                 </a>
             </div>
         </div>

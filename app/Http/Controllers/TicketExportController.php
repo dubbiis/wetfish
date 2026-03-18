@@ -39,7 +39,8 @@ class TicketExportController extends Controller
             'business' => $business,
         ]);
 
-        $pdf->setPaper('A4', 'portrait');
+        // Formato ticket: 80mm x 200mm (tamaño recibo de caja)
+        $pdf->setPaper([0, 0, 226.77, 566.93], 'portrait');
 
         $filename = count($tickets) === 1
             ? "ticket-{$tickets->first()->id}.pdf"

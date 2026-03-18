@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use App\Models\Ticket;
-use App\Models\Setting;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
@@ -87,84 +86,11 @@ class TicketHistory extends Component
         $this->selectAll = false;
     }
 
-    public function getWhatsappUrl(int $ticketId): string
-    {
-        $ticket = Ticket::with(['items.product', 'user'])->find($ticketId);
-        if (!$ticket) return '';
-
-        $business = Setting::get('business_name', 'WetFish');
-        $phone = Setting::get('business_phone', '');
-        $cif = Setting::get('business_cif', '');
-
-        $text = "🐟 *{$business}*\n";
-        if ($cif) $text .= "CIF: {$cif}\n";
-        $text .= "Ticket #{$ticket->id}\n";
-        $text .= "Fecha: " . $ticket->created_at->format('d/m/Y H:i') . "\n";
-        $text .= "Vendedor: " . ($ticket->user?->name ?? '-') . "\n";
-        $text .= "─────────────\n";
-
-        foreach ($ticket->items as $item) {
-            $name = $item->product?->name ?? 'Producto';
-            $text .= "{$item->quantity}x {$name} — €" . number_format($item->subtotal, 2, ',', '.') . "\n";
-        }
-
-        $text .= "─────────────\n";
-        $text .= "Subtotal: €" . number_format($ticket->subtotal, 2, ',', '.') . "\n";
-        if ($ticket->discount_value > 0) {
-            $text .= "Descuento: -€" . number_format($ticket->discount_value, 2, ',', '.') . "\n";
-        }
-        $text .= "IVA ({$ticket->tax_rate}%): €" . number_format($ticket->tax_amount, 2, ',', '.') . "\n";
-        $text .= "*TOTAL: €" . number_format($ticket->total, 2, ',', '.') . "*\n";
-        $text .= "\nGracias por su compra 🙏";
-
-        return 'https://wa.me/?text=' . urlencode($text);
-    }
-
     public function getExportUrl(): string
     {
         if (empty($this->selected)) return '';
         $ids = implode(',', $this->selected);
         return route('tickets.export', ['ids' => $ids]);
-    }
-
-    public function getShareWhatsappUrl(): string
-    {
-        if (empty($this->selected)) return '';
-
-        $tickets = Ticket::with(['items.product', 'user'])
-            ->whereIn('id', $this->selected)
-            ->orderByDesc('created_at')
-            ->get();
-
-        if ($tickets->isEmpty()) return '';
-
-        $business = Setting::get('business_name', 'WetFish');
-        $cif = Setting::get('business_cif', '');
-
-        $text = "🐟 *{$business}*\n";
-        if ($cif) $text .= "CIF: {$cif}\n";
-        $text .= "─────────────\n\n";
-
-        foreach ($tickets as $ticket) {
-            $text .= "*Ticket #{$ticket->id}*\n";
-            $text .= "Fecha: " . $ticket->created_at->format('d/m/Y H:i') . "\n";
-            $text .= "Vendedor: " . ($ticket->user?->name ?? '-') . "\n";
-
-            foreach ($ticket->items as $item) {
-                $name = $item->product?->name ?? 'Producto';
-                $text .= "  {$item->quantity}x {$name} — €" . number_format($item->subtotal, 2, ',', '.') . "\n";
-            }
-
-            $text .= "*Total: €" . number_format($ticket->total, 2, ',', '.') . "*\n\n";
-        }
-
-        $total = $tickets->sum('total');
-        if ($tickets->count() > 1) {
-            $text .= "─────────────\n";
-            $text .= "*TOTAL ({$tickets->count()} tickets): €" . number_format($total, 2, ',', '.') . "*\n";
-        }
-
-        return 'https://wa.me/?text=' . urlencode($text);
     }
 
     private function getDateRange(): array
