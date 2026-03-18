@@ -78,7 +78,8 @@ class Dashboard extends Component
 
         // Sales by category
         $salesByCategory = $ticketItems->groupBy(fn($item) => $item->product?->category?->name ?? 'Sin categoría')
-            ->map(fn($items) => [
+            ->map(fn($items, $name) => [
+                'name'    => $name,
                 'units'   => $items->sum('quantity'),
                 'revenue' => $items->sum('subtotal'),
             ])

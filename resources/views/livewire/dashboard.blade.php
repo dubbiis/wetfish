@@ -113,11 +113,11 @@
         @else
             @php $maxCatRev = $salesByCategory->first()['revenue'] ?? 1; @endphp
             <div class="space-y-3">
-                @foreach($salesByCategory as $cat => $data)
+                @foreach($salesByCategory as $data)
                     @php $pct = $maxCatRev > 0 ? ($data['revenue'] / $maxCatRev) * 100 : 0; @endphp
                     <div class="space-y-1">
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-slate-200 truncate flex-1 mr-2">{{ $cat }}</span>
+                            <span class="text-sm text-slate-200 truncate flex-1 mr-2">{{ $data['name'] }}</span>
                             <div class="text-right whitespace-nowrap">
                                 <span class="text-sm font-bold text-white">€ {{ number_format($data['revenue'], 2, ',', '.') }}</span>
                                 <span class="text-xs text-slate-500 ml-2">{{ $data['units'] }} uds</span>
