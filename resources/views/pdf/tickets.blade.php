@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: DejaVu Sans Mono, monospace; font-size: 10px; color: #000; width: 100%; }
+        body { font-family: sans-serif; font-size: 10px; color: #000; width: 100%; }
         .ticket { padding: 10px 5px; page-break-after: always; }
         .ticket:last-child { page-break-after: auto; }
 
