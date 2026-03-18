@@ -87,7 +87,7 @@
 
     <!-- ── Modal añadir/editar gasto ── -->
     @if($showAddModal)
-    <div class="fixed inset-0 z-50 flex items-end justify-center">
+    <div class="fixed inset-0 z-[60] flex items-end justify-center pb-24">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeModal"></div>
         <div class="relative w-full max-w-lg bg-[#171121] border border-white/10 rounded-t-3xl flex flex-col max-h-[85vh]">
             <!-- Header fijo -->
@@ -155,7 +155,7 @@
 
     <!-- ── Modal gestionar categorías ── -->
     @if($showCategoryModal)
-    <div class="fixed inset-0 z-50 flex items-end justify-center">
+    <div class="fixed inset-0 z-[60] flex items-end justify-center pb-24">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeCategoryModal"></div>
         <div class="relative w-full max-w-lg bg-[#171121] border border-white/10 rounded-t-3xl flex flex-col max-h-[85vh]">
             <!-- Header fijo -->

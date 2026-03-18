@@ -98,7 +98,7 @@
 
     <!-- Modal formulario -->
     @if($showForm)
-    <div class="fixed inset-0 z-50 flex items-end justify-center">
+    <div class="fixed inset-0 z-[60] flex items-end justify-center pb-24">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeForm"></div>
         <div class="relative w-full max-w-lg bg-background-dark border border-white/10 rounded-t-3xl flex flex-col max-h-[85vh]">
             <!-- Header fijo -->
