@@ -22,9 +22,12 @@ if [ ! -f .env ]; then
     echo "LOG_CHANNEL=stderr" >> .env
 fi
 
-# Run migrations and seed
-php artisan migrate --force
-php artisan db:seed --force
+# Create storage link if it doesn't exist
+php artisan storage:link 2>/dev/null || true
+
+# Run migrations and seed (don't abort on failure)
+php artisan migrate --force || echo "WARNING: Migration had issues, continuing..."
+php artisan db:seed --force || echo "WARNING: Seeder had issues, continuing..."
 
 # Cache config and routes for production
 php artisan config:cache
