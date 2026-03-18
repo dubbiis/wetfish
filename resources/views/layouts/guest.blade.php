@@ -19,9 +19,7 @@
 
         <!-- Logo -->
         <div class="mb-10 text-center">
-            <div class="inline-flex items-center justify-center size-16 rounded-xl bg-primary/20 mb-4 border border-primary/30">
-                <span class="material-symbols-outlined text-primary text-4xl">phishing</span>
-            </div>
+            <img src="{{ asset('images/logo.png') }}" alt="WetFish" class="size-24 mx-auto mb-4 rounded-2xl">
             <h1 class="text-3xl font-bold tracking-tight text-slate-100">WetFish</h1>
             <p class="text-slate-400 mt-2 text-sm font-medium">Sistema de gestion acuariofilia</p>
         </div>

@@ -17,6 +17,7 @@
     <!-- Header -->
     <header class="sticky top-0 z-50 glass-nav border-b border-white/5 px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
+            <img src="{{ asset('images/logo.png') }}" alt="WetFish" class="size-8 rounded-lg">
             <h1 class="text-xl font-bold tracking-tight">{{ $header ?? 'WetFish' }}</h1>
         </div>
         <div class="flex items-center gap-3">
