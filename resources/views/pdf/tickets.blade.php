@@ -3,14 +3,12 @@
 <head>
     <meta charset="utf-8">
     <style>
-        @page { margin: 0; }
+        @page { margin: 5mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 9px;
+            font-family: sans-serif;
+            font-size: 10px;
             color: #000;
-            width: 80mm;
-            padding: 4mm;
         }
         .ticket {
             page-break-after: always;
@@ -19,45 +17,47 @@
         .ticket:last-child { page-break-after: auto; }
         .center { text-align: center; }
         .right { text-align: right; }
-        .bold { font-weight: bold; }
         .shop-name {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: bold;
             border: 2px solid #000;
-            padding: 4px 10px;
+            padding: 3px 12px;
             display: inline-block;
-            margin: 4px 0;
+            margin: 5px 0;
         }
         .header {
             text-align: center;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
-        .header p { font-size: 8px; line-height: 1.3; }
+        .header p { font-size: 9px; line-height: 1.4; }
         .sep {
             border: none;
             border-top: 1px dashed #000;
-            margin: 4px 0;
+            margin: 5px 0;
         }
         .sep-bold {
             border: none;
             border-top: 2px solid #000;
-            margin: 4px 0;
+            margin: 5px 0;
         }
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        td { font-size: 9px; padding: 1px 0; vertical-align: top; }
+        td {
+            font-size: 10px;
+            padding: 2px 0;
+            vertical-align: top;
+        }
         .total-line td {
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
-            padding-top: 4px;
-            padding-bottom: 4px;
+            padding: 5px 0;
         }
         .footer {
             text-align: center;
-            margin-top: 8px;
-            font-size: 8px;
+            margin-top: 10px;
+            font-size: 9px;
             color: #333;
         }
     </style>
@@ -80,8 +80,8 @@
 
         <table>
             <tr>
-                <td>{{ $ticket->created_at->format('d/m/Y') }}</td>
-                <td class="right">{{ $ticket->created_at->format('H:i') }}</td>
+                <td>Ticket #{{ $ticket->id }}</td>
+                <td class="right">{{ $ticket->created_at->format('d/m/Y H:i') }}</td>
             </tr>
         </table>
 
@@ -90,9 +90,8 @@
         <table>
             @foreach($ticket->items as $item)
             <tr>
-                <td style="width:45px">{{ $item->product?->code ?? '---' }}</td>
-                <td>{{ $item->product?->name ?? 'Producto' }} x {{ $item->quantity }}</td>
-                <td class="right" style="width:50px">&euro;{{ number_format($item->subtotal, 2, ',', '.') }}</td>
+                <td>{{ $item->product?->name ?? 'Producto' }} x{{ $item->quantity }}</td>
+                <td class="right" style="white-space:nowrap">&euro;{{ number_format($item->subtotal, 2, ',', '.') }}</td>
             </tr>
             @endforeach
         </table>
@@ -132,17 +131,10 @@
                 <td>Vendedor:</td>
                 <td class="right">{{ $ticket->user?->name ?? 'Usuario' }}</td>
             </tr>
-            <tr>
-                <td>Ticket:</td>
-                <td class="right">#{{ $ticket->id }}</td>
-            </tr>
         </table>
-
-        <hr class="sep">
 
         <div class="footer">
             <p>Gracias por su compra</p>
-            <p>{{ $business['name'] }}</p>
         </div>
     </div>
     @endforeach

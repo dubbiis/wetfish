@@ -40,9 +40,8 @@ class TicketExportController extends Controller
                 'business' => $business,
             ]);
 
-            // 80mm x 297mm en puntos (1mm = 2.8346pt)
-            $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait');
-            $pdf->getDomPDF()->getOptions()->set('isPhpEnabled', true);
+            // 100mm x 250mm en puntos (1mm = 2.8346pt)
+            $pdf->setPaper([0, 0, 283.46, 708.66], 'portrait');
 
             $filename = count($tickets) === 1
                 ? "ticket-{$tickets->first()->id}.pdf"
