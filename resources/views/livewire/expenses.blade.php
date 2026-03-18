@@ -89,15 +89,17 @@
     @if($showAddModal)
     <div class="fixed inset-0 z-50 flex items-end justify-center">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeModal"></div>
-        <div class="relative w-full max-w-lg bg-[#171121] border border-white/10 rounded-t-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between">
+        <div class="relative w-full max-w-lg bg-[#171121] border border-white/10 rounded-t-3xl flex flex-col max-h-[85vh]">
+            <!-- Header fijo -->
+            <div class="flex items-center justify-between p-5 pb-4 shrink-0">
                 <h3 class="text-lg font-bold text-white">{{ $editingId ? 'Editar gasto' : 'Nuevo gasto' }}</h3>
                 <button wire:click="closeModal" class="text-white/40 hover:text-white">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
 
-            <div class="space-y-3">
+            <!-- Contenido scrollable -->
+            <div class="overflow-y-auto flex-1 px-5 space-y-3">
                 <div>
                     <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Categoría</label>
                     <select wire:model="categoryId"
@@ -132,7 +134,7 @@
                     </div>
                 </div>
 
-                <div>
+                <div class="pb-2">
                     <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Notas (opcional)</label>
                     <textarea wire:model="notes" rows="2" placeholder="Observaciones..."
                         class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder:text-white/30 focus:ring-1 focus:ring-primary/50 resize-none"></textarea>
@@ -140,10 +142,13 @@
                 </div>
             </div>
 
-            <button wire:click="saveExpense"
-                class="w-full h-12 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 transition-all active:scale-95">
-                {{ $editingId ? 'Guardar cambios' : 'Añadir gasto' }}
-            </button>
+            <!-- Botón fijo al fondo -->
+            <div class="p-5 pt-4 shrink-0">
+                <button wire:click="saveExpense"
+                    class="w-full h-12 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 transition-all active:scale-95">
+                    {{ $editingId ? 'Guardar cambios' : 'Añadir gasto' }}
+                </button>
+            </div>
         </div>
     </div>
     @endif
@@ -152,19 +157,21 @@
     @if($showCategoryModal)
     <div class="fixed inset-0 z-50 flex items-end justify-center">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeCategoryModal"></div>
-        <div class="relative w-full max-w-lg bg-[#171121] border border-white/10 rounded-t-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between">
+        <div class="relative w-full max-w-lg bg-[#171121] border border-white/10 rounded-t-3xl flex flex-col max-h-[85vh]">
+            <!-- Header fijo -->
+            <div class="flex items-center justify-between p-5 pb-4 shrink-0">
                 <h3 class="text-lg font-bold text-white">Gestionar categorías</h3>
                 <button wire:click="closeCategoryModal" class="text-white/40 hover:text-white">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
 
-            @error('deleteCategory')
-            <p class="text-rose-400 text-sm bg-rose-500/10 rounded-xl px-4 py-2">{{ $message }}</p>
-            @enderror
+            <!-- Contenido scrollable -->
+            <div class="overflow-y-auto flex-1 px-5 space-y-2">
+                @error('deleteCategory')
+                <p class="text-rose-400 text-sm bg-rose-500/10 rounded-xl px-4 py-2">{{ $message }}</p>
+                @enderror
 
-            <div class="space-y-2">
                 @foreach($categories as $cat)
                 <div class="flex items-center gap-3 glass-card rounded-xl px-4 py-3">
                     <span class="material-symbols-outlined text-primary text-xl">{{ $cat->icon }}</span>
@@ -175,25 +182,29 @@
                     </button>
                 </div>
                 @endforeach
-            </div>
 
-            <div class="border-t border-white/10 pt-4 space-y-3">
-                <p class="text-xs font-bold uppercase tracking-widest text-white/40">Nueva categoría</p>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-xs text-white/40 mb-1 block">Nombre</label>
-                        <input wire:model="newCategoryName" type="text" placeholder="Ej: Publicidad"
-                            class="w-full h-11 px-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder:text-white/30 focus:ring-1 focus:ring-primary/50 text-sm">
-                        @error('newCategoryName') <p class="text-rose-400 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label class="text-xs text-white/40 mb-1 block">Icono Material</label>
-                        <input wire:model="newCategoryIcon" type="text" placeholder="Ej: campaign"
-                            class="w-full h-11 px-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder:text-white/30 focus:ring-1 focus:ring-primary/50 text-sm">
+                <div class="border-t border-white/10 pt-4 space-y-3 pb-2">
+                    <p class="text-xs font-bold uppercase tracking-widest text-white/40">Nueva categoría</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-white/40 mb-1 block">Nombre</label>
+                            <input wire:model="newCategoryName" type="text" placeholder="Ej: Publicidad"
+                                class="w-full h-11 px-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder:text-white/30 focus:ring-1 focus:ring-primary/50 text-sm">
+                            @error('newCategoryName') <p class="text-rose-400 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label class="text-xs text-white/40 mb-1 block">Icono Material</label>
+                            <input wire:model="newCategoryIcon" type="text" placeholder="Ej: campaign"
+                                class="w-full h-11 px-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder:text-white/30 focus:ring-1 focus:ring-primary/50 text-sm">
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Botón fijo al fondo -->
+            <div class="p-5 pt-4 shrink-0">
                 <button wire:click="saveCategory"
-                    class="w-full h-11 rounded-xl bg-primary/80 text-white font-semibold text-sm transition-all active:scale-95">
+                    class="w-full h-12 rounded-xl bg-primary/80 text-white font-semibold transition-all active:scale-95">
                     Añadir categoría
                 </button>
             </div>

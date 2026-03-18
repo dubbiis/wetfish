@@ -100,15 +100,17 @@
     @if($showForm)
     <div class="fixed inset-0 z-50 flex items-end justify-center">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeForm"></div>
-        <div class="relative w-full max-w-lg bg-background-dark border border-white/10 rounded-t-3xl p-5 space-y-4">
-            <div class="flex items-center justify-between">
+        <div class="relative w-full max-w-lg bg-background-dark border border-white/10 rounded-t-3xl flex flex-col max-h-[85vh]">
+            <!-- Header fijo -->
+            <div class="flex items-center justify-between p-5 pb-4 shrink-0">
                 <h3 class="text-xl font-bold text-white">{{ $editingTaskId ? 'Editar tarea' : 'Nueva tarea' }}</h3>
                 <button wire:click="closeForm" class="size-10 rounded-full bg-white/5 flex items-center justify-center">
                     <span class="material-symbols-outlined text-slate-300">close</span>
                 </button>
             </div>
 
-            <div class="space-y-3">
+            <!-- Contenido scrollable -->
+            <div class="overflow-y-auto flex-1 px-5 space-y-3">
                 <div>
                     <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Título</label>
                     <input wire:model="title" type="text"
@@ -124,17 +126,20 @@
                         placeholder="Detalles de la tarea..."></textarea>
                 </div>
 
-                <div>
+                <div class="pb-2">
                     <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Fecha límite</label>
                     <input wire:model="dueDate" type="date"
                         class="w-full h-12 px-4 bg-white/5 border border-white/5 rounded-xl focus:ring-1 focus:ring-primary/50 text-slate-100">
                 </div>
             </div>
 
-            <button wire:click="save"
-                class="w-full h-12 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 transition-all active:scale-[0.98]">
-                {{ $editingTaskId ? 'Guardar cambios' : 'Crear tarea' }}
-            </button>
+            <!-- Botón fijo al fondo -->
+            <div class="p-5 pt-4 shrink-0">
+                <button wire:click="save"
+                    class="w-full h-12 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 transition-all active:scale-[0.98]">
+                    {{ $editingTaskId ? 'Guardar cambios' : 'Crear tarea' }}
+                </button>
+            </div>
         </div>
     </div>
     @endif
