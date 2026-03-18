@@ -1,45 +1,46 @@
 # WetFish
 
-TPV (Punto de Venta) y sistema de gestion de stock para tienda de acuariofilia. Aplicacion web mobile-first con interfaz oscura glassmorphism, pensada para usarse desde el movil como PWA.
+TPV (Punto de Venta) y sistema de gestión de stock para tienda de acuariofilia. Aplicación web mobile-first con interfaz oscura glassmorphism, pensada para usarse desde el móvil como PWA.
 
 ## Funcionalidades
 
 ### Punto de Venta (TPV)
-- Busqueda rapida de productos por nombre o codigo
-- Filtro por categorias
+- Búsqueda rápida de productos por nombre o código
+- Filtro por categorías
 - Carrito con control de cantidades (+/-)
 - Descuentos por porcentaje o importe fijo
-- Calculo automatico de IVA configurable
-- Generacion de ticket con descuento automatico de stock
+- Cálculo automático de IVA configurable
+- Generación de ticket con descuento automático de stock
+- Tras completar venta, redirección automática al historial de tickets
 - Accesible para admin y empleados
 
 ### Dashboard (Admin)
 - Ingresos totales por periodo (hoy, semana, mes)
 - Beneficio neto (ingresos - compras - servicios)
-- Numero de tickets y ticket promedio
+- Número de tickets y ticket promedio (card enlaza a /tickets)
 - Unidades vendidas
-- Alerta de productos con stock critico
+- Alerta de productos con stock crítico
 
-### Gestion de Stock (Admin)
-- Listado de productos con busqueda
-- Filtros por categoria y estado de stock (ok, bajo, critico)
-- Indicadores visuales de estado (verde, ambar, rojo)
-- Crear/editar productos con foto, precios, stock minimo
-- Margen automatico configurable sobre precio de coste
+### Gestión de Stock (Admin)
+- Listado de productos con búsqueda y paginación
+- Filtros por categoría y estado de stock (ok, bajo, crítico)
+- Indicadores visuales de estado (verde, ámbar, rojo)
+- Crear/editar productos con foto, precios, stock mínimo
+- Margen automático configurable sobre precio de coste
+- Botón FAB (+) para crear nuevo producto
 
 ### Historial de Tickets (Admin)
 - Listado de ventas por periodo (hoy, semana, mes, personalizado, todo)
 - Total de ingresos y conteo de tickets del periodo
-- Detalle de cada ticket: datos empresa, productos, cantidades, descuentos, IVA, total
-- Busqueda por numero de ticket o vendedor
-- Seleccion multiple de tickets (individual o todos)
-- Exportar tickets seleccionados a PDF
-- Enviar ticket por WhatsApp al cliente
-- Tras completar venta, redireccion automatica al historial de tickets
+- Detalle de cada ticket en modal: datos empresa, productos, cantidades, descuentos, IVA, total
+- Búsqueda por número de ticket o vendedor
+- Selección múltiple de tickets (individual o todos)
+- Exportar tickets seleccionados a PDF (formato recibo de caja)
+- Botón "Descargar PDF" en detalle del ticket individual
 
-### Tareas (Admin → Empleado)
-- El admin asigna tareas a empleados concretos desde Configuracion
-- Cada tarea tiene titulo, descripcion y fecha limite
+### Tareas (Admin a Empleado)
+- El admin asigna tareas a empleados concretos desde Configuración (click en empleado)
+- Cada tarea tiene título, descripción y fecha límite
 - Estados: pendiente, en progreso, completada
 - El empleado ve sus tareas y puede cambiar el estado
 - Filtros por estado en ambas vistas
@@ -51,34 +52,34 @@ TPV (Punto de Venta) y sistema de gestion de stock para tienda de acuariofilia. 
 - Facturas de servicio (gastos operativos)
 - Filtros por tipo y periodo
 - Totales separados compras vs servicios
-- Acceso rapido al importador de facturas
+- Acceso rápido al importador de facturas
 
 ### Importador de Facturas
 - Subida de archivos Excel (.xlsx, .xls, .csv)
-- Proceso en 3 pasos: subir → datos factura → revisar productos
-- Matching automatico de productos existentes por codigo o nombre
-- Creacion automatica de productos nuevos con margen configurado
-- Actualizacion de stock y precios de coste de productos existentes
+- Proceso en 3 pasos: subir archivo, datos factura, revisar productos
+- Matching automático de productos existentes por código o nombre
+- Creación automática de productos nuevos con margen configurado
+- Actualización de stock y precios de coste de productos existentes
 - Soporte para facturas de compra y de servicio
 - Registro de costes extra (transporte, etc.)
 
-### Configuracion (Admin)
-- Datos del negocio (nombre, CIF, direccion, telefono, email)
+### Configuración (Admin)
+- Datos del negocio (nombre, CIF, dirección, teléfono, email)
 - IVA configurable
-- Porcentaje de margen automatico
-- Gestion de empleados (crear, eliminar)
-- Cierre de sesion
+- Porcentaje de margen automático
+- Gestión de empleados (crear, eliminar, click para gestionar tareas)
+- Cierre de sesión
 
 ## Roles
 
 | Rol | Acceso |
 |-----|--------|
-| **admin** | Dashboard, Stock, Tickets, Gastos, Configuracion, Tareas empleados, TPV, Facturas |
+| **admin** | Dashboard, Stock, Tickets, Gastos, Configuración, Tareas empleados, TPV, Facturas |
 | **employee** | TPV, Mis Tareas, Importador de facturas |
 
-## Stack Tecnico
+## Stack Técnico
 
-| Tecnologia | Version | Uso |
+| Tecnología | Versión | Uso |
 |-----------|---------|-----|
 | PHP | 8.4 | Backend |
 | Laravel | 12 | Framework |
@@ -86,9 +87,10 @@ TPV (Punto de Venta) y sistema de gestion de stock para tienda de acuariofilia. 
 | Alpine.js | 3 | Interactividad frontend (inyectado por Livewire) |
 | Tailwind CSS | 3 | Estilos |
 | Vite | 7 | Build de assets |
+| Laravel Breeze | 2 | Autenticación |
 | PhpSpreadsheet | 5 | Lectura de Excel para importar facturas |
-| DomPDF | 3 | Generacion de tickets en PDF |
-| MySQL | 8 | Base de datos en produccion |
+| DomPDF | 3 | Generación de tickets en PDF |
+| MySQL | 8 | Base de datos en producción |
 | Docker | PHP 8.4-cli | Deploy en EasyPanel |
 
 ## Modelo de Datos
@@ -106,14 +108,10 @@ Supplier → Invoice (purchase | service)
 Setting (key-value)
 ```
 
-### Categorias predefinidas
-- Peces
-- Plantas
-- Accesorios
-- Peces criadero
-- Plantas criadero
+### Categorías predefinidas
+- Peces, Plantas, Accesorios, Peces criadero, Plantas criadero
 
-## Instalacion Local
+## Instalación Local
 
 ### Requisitos
 - PHP 8.4 con extensiones: pdo_mysql, mbstring, zip, gd, bcmath
@@ -146,15 +144,16 @@ npm run dev          # Vite HMR en paralelo
 
 ## Deploy
 
-El proyecto se despliega automaticamente en **EasyPanel** via Dockerfile.
+El proyecto se despliega automáticamente en **EasyPanel** vía Dockerfile.
 
 ```
 git push origin master → GitHub webhook → EasyPanel rebuild → Deploy
 ```
 
 - **URL:** `https://desarrollos-wetfish.o28eg0.easypanel.host`
-- **Document root:** `public_html/` (no `public/`)
-- **Servidor:** `php -S` con `router.php` para servir estaticos
+- **Document root:** `public_html/` (NO `public/`)
+- **Servidor:** `php -S 0.0.0.0:8080` con `router.php`
+- **Puerto EasyPanel:** 8080
 - **BD:** MySQL 8 en EasyPanel
 
 ## Estructura del Proyecto
@@ -163,51 +162,61 @@ git push origin master → GitHub webhook → EasyPanel rebuild → Deploy
 wetfish/
 ├── app/
 │   ├── Http/
-│   │   ├── Controllers/Auth/          # Login con redireccion por rol
-│   │   └── Middleware/RoleMiddleware   # Control de acceso por rol
-│   ├── Livewire/                      # 10 componentes
-│   │   ├── Dashboard.php              # Metricas y stats
-│   │   ├── StockList.php              # Listado de productos
-│   │   ├── ProductEdit.php            # Crear/editar producto
-│   │   ├── TicketHistory.php          # Historial de ventas + multi-select + export
-│   │   ├── EmployeeTasks.php          # Admin gestiona tareas de un empleado
-│   │   ├── MyTasks.php                # Empleado ve y actualiza sus tareas
-│   │   ├── Expenses.php               # Vista de gastos
-│   │   ├── Settings.php               # Configuracion del negocio
-│   │   ├── PointOfSale.php            # TPV
-│   │   └── InvoiceImporter.php        # Importar facturas Excel
-│   └── Models/                        # 10 modelos Eloquent
-│       ├── User.php                   # Auth + roles
-│       ├── Category.php
-│       ├── Product.php                # Stock, precios, margen auto
-│       ├── Supplier.php
-│       ├── Ticket.php                 # Venta
-│       ├── TicketItem.php
-│       ├── Invoice.php                # Factura (compra/servicio)
-│       ├── InvoiceItem.php
-│       ├── Setting.php               # Key-value config
-│       └── Task.php                  # Tareas asignadas a empleados
+│   │   ├── Controllers/
+│   │   │   ├── Auth/                      # Login con redirección por rol
+│   │   │   └── TicketExportController.php # Exportar tickets a PDF
+│   │   └── Middleware/RoleMiddleware.php   # Control de acceso por rol
+│   ├── Livewire/                          # 10 componentes
+│   │   ├── Dashboard.php                  # Métricas y stats por periodo
+│   │   ├── StockList.php                  # Listado de productos con filtros
+│   │   ├── ProductEdit.php                # Crear/editar producto con foto
+│   │   ├── TicketHistory.php              # Historial ventas + multi-select + export PDF
+│   │   ├── EmployeeTasks.php              # Admin gestiona tareas de un empleado
+│   │   ├── MyTasks.php                    # Empleado ve y actualiza sus tareas
+│   │   ├── Expenses.php                   # Vista de gastos con filtros
+│   │   ├── Settings.php                   # Config negocio + empleados
+│   │   ├── PointOfSale.php                # TPV con carrito y checkout
+│   │   └── InvoiceImporter.php            # Importar facturas Excel (3 pasos)
+│   ├── Models/                            # 10 modelos Eloquent
+│   │   ├── User.php                       # Auth + roles (admin|employee)
+│   │   ├── Category.php                   # Categorías de productos
+│   │   ├── Product.php                    # Stock, precios, margen auto
+│   │   ├── Supplier.php                   # Proveedores
+│   │   ├── Ticket.php                     # Venta (cabecera)
+│   │   ├── TicketItem.php                 # Líneas de venta
+│   │   ├── Invoice.php                    # Factura (compra/servicio)
+│   │   ├── InvoiceItem.php                # Líneas de factura
+│   │   ├── Setting.php                    # Key-value config
+│   │   └── Task.php                       # Tareas asignadas a empleados
+│   └── Providers/
+│       └── AppServiceProvider.php         # CRÍTICO: bind path.public a public_html
+├── config/
+│   └── dompdf.php                         # CRÍTICO: public_path a public_html
 ├── database/
-│   ├── migrations/                    # 12 migraciones
-│   └── seeders/                       # Admin + categorias + settings
+│   ├── migrations/                        # 13 migraciones (todas idempotentes)
+│   └── seeders/                           # Admin + categorías + settings + productos
 ├── resources/
-│   ├── css/app.css                    # Tailwind + glassmorphism custom
+│   ├── css/app.css                        # Tailwind + glassmorphism custom classes
 │   └── views/
-│       ├── layouts/                   # app.blade.php + guest.blade.php
-│       ├── livewire/                  # 10 vistas de componentes
-│       ├── pdf/tickets.blade.php      # Plantilla PDF para tickets
-│       └── auth/login.blade.php       # Login personalizado
+│       ├── layouts/                       # app.blade.php (nav) + guest.blade.php (login)
+│       ├── livewire/                      # 10 vistas de componentes
+│       ├── pdf/tickets.blade.php          # Plantilla PDF formato recibo
+│       ├── components/nav-item.blade.php  # Componente de navegación
+│       └── auth/login.blade.php           # Login personalizado
 ├── routes/
-│   ├── web.php                        # Rutas protegidas por rol
-│   └── auth.php                       # Auth de Breeze
-├── public_html/                       # Document root
-│   ├── router.php                     # Router para php -S
-│   └── build/                         # Assets compilados
-├── Dockerfile                         # PHP 8.4 + Node 22
-├── start.sh                           # Entrypoint del container
-├── vite.config.js
+│   ├── web.php                            # Rutas protegidas por rol
+│   └── auth.php                           # Auth de Breeze
+├── public_html/                           # Document root (NO public/)
+│   ├── router.php                         # Router para php -S
+│   ├── images/logo.png                    # Logo de la empresa (30KB)
+│   └── build/                             # Assets compilados por Vite
+├── bootstrap/app.php                      # trustProxies + middleware role
+├── Dockerfile                             # PHP 8.4-cli + Node 22 + Composer
+├── start.sh                               # Entrypoint: .env, migrate, seed, php -S
+├── vite.config.js                         # publicDirectory: public_html
 ├── tailwind.config.js
-└── CLAUDE.md                          # Directrices para desarrollo con IA
+├── CLAUDE.md                              # Directrices para desarrollo con IA
+└── README.md                              # Este archivo
 ```
 
 ## Licencia
