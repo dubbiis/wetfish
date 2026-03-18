@@ -52,7 +52,7 @@
                     <p class="text-2xl font-bold text-slate-100 tracking-tight">{{ $product->stock }}</p>
                     <p class="text-[9px] text-white/40 font-bold uppercase tracking-tighter">Uds</p>
                 </div>
-                <a href="{{ route('stock.edit', $product) }}"
+                <a href="{{ route('stock.edit', ['productId' => $product->id]) }}"
                     class="flex h-9 px-4 items-center justify-center rounded-xl bg-white/5 border border-white/5 text-slate-200 text-xs font-bold hover:bg-primary hover:border-primary transition-all uppercase tracking-widest">
                     Edit
                 </a>
@@ -69,7 +69,7 @@
     {{ $products->links() }}
 
     <!-- FAB -->
-    <a href="{{ route('stock.edit', ['product' => 'new']) }}"
+    <a href="{{ route('stock.edit', ['productId' => 'new']) }}"
         class="fixed right-6 bottom-28 size-14 rounded-full bg-primary text-white shadow-2xl shadow-primary/50 flex items-center justify-center transition-all active:scale-95 z-40 border border-white/10">
         <span class="material-symbols-outlined text-3xl">add</span>
     </a>

@@ -15,7 +15,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/dashboard', \App\Livewire\Dashboard::class)->name('dashboard');
         Route::get('/stock', \App\Livewire\StockList::class)->name('stock');
-        Route::get('/stock/{product}/edit', \App\Livewire\ProductEdit::class)->name('stock.edit');
+        Route::get('/stock/{productId}/edit', \App\Livewire\ProductEdit::class)->name('stock.edit');
         Route::get('/tickets', \App\Livewire\TicketHistory::class)->name('tickets');
         Route::get('/expenses', \App\Livewire\Expenses::class)->name('expenses');
         Route::get('/settings', \App\Livewire\Settings::class)->name('settings');

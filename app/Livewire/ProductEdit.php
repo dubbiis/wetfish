@@ -30,14 +30,14 @@ class ProductEdit extends Component
     public $photo;
     public ?string $existingPhoto = null;
 
-    public function mount(string $product = 'new'): void
+    public function mount(string $productId = 'new'): void
     {
-        if ($product === 'new') {
+        if ($productId === 'new') {
             $this->isNew = true;
             $marginPct = Setting::get('auto_margin_percentage', 30);
             $this->auto_margin = false;
         } else {
-            $this->product = Product::findOrFail($product);
+            $this->product = Product::findOrFail($productId);
             $this->name = $this->product->name;
             $this->code = $this->product->code ?? '';
             $this->category_id = $this->product->category_id;
