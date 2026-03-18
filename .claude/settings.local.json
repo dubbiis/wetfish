@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git --version)",
+      "Bash(gh --version)",
+      "Bash(git clone:*)",
+      "Bash(composer install:*)",
+      "Bash(php --ini)",
+      "Bash(npm install:*)",
+      "Bash(php artisan:*)",
+      "Bash(icacls \"C:\\\\Users\\\\dagar\\\\Documents\\\\proyectos\\\\wetfish\\\\bootstrap\\\\cache\" /grant \"%USERNAME%:F\" /T)",
+      "Bash(cmd /c \"icacls \"\"C:\\\\Users\\\\dagar\\\\Documents\\\\proyectos\\\\wetfish\\\\bootstrap\\\\cache\"\" /grant \"\"%USERNAME%:F\"\" /T\")",
+      "Bash(chmod -R 777 /c/Users/dagar/Documents/proyectos/wetfish/bootstrap/cache)",
+      "Bash(git config:*)",
+      "Bash(gh auth:*)"
+    ]
+  }
+}

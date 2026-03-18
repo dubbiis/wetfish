@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Ticket;
@@ -45,8 +46,22 @@ class Dashboard extends Component
         $serviceCosts = Invoice::where('type', 'service')
             ->whereBetween('invoice_date', [$range['start'], $range['end']])
             ->sum('total');
-        $netProfit    = $revenue - $purchaseCosts - $serviceCosts;
-        $marginPct    = $revenue > 0 ? round(($netProfit / $revenue) * 100, 1) : 0;
+        $operationalCosts = Expense::whereBetween('date', [$range['start'], $range['end']])->sum('amount');
+        $netProfit        = $revenue - $purchaseCosts - $serviceCosts - $operationalCosts;
+        $marginPct        = $revenue > 0 ? round(($netProfit / $revenue) * 100, 1) : 0;
+
+        // Gastos operativos por categoría para el dashboard
+        $expensesByCategory = Expense::with('category')
+            ->whereBetween('date', [$range['start'], $range['end']])
+            ->get()
+            ->groupBy('expense_category_id')
+            ->map(fn($items) => [
+                'name'  => $items->first()->category?->name ?? 'Sin categoría',
+                'icon'  => $items->first()->category?->icon ?? 'receipt',
+                'total' => $items->sum('amount'),
+            ])
+            ->sortByDesc('total')
+            ->values();
 
         // Stock & inventory
         $criticalProducts  = Product::whereColumn('stock', '<=', 'min_stock')->count();
@@ -110,10 +125,10 @@ class Dashboard extends Component
 
         return view('livewire.dashboard', compact(
             'revenue', 'netProfit', 'ticketCount', 'avgTicket', 'unitsSold',
-            'maxTicket', 'lastTicket', 'purchaseCosts', 'serviceCosts', 'marginPct',
+            'maxTicket', 'lastTicket', 'purchaseCosts', 'serviceCosts', 'operationalCosts', 'marginPct',
             'criticalProducts', 'inventoryValue', 'inactiveProducts',
             'topProductsByQty', 'topProductsByRevenue', 'salesByCategory',
-            'peakHour', 'bestDay'
+            'expensesByCategory', 'peakHour', 'bestDay'
         ));
     }
 

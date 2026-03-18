@@ -152,7 +152,39 @@
                 <p class="text-xs text-slate-400">Servicios</p>
                 <p class="text-xl font-bold text-orange-400">€ {{ number_format($serviceCosts, 2, ',', '.') }}</p>
             </div>
+            <div class="space-y-1 col-span-2 pt-2 border-t border-white/5">
+                <p class="text-xs text-slate-400">Gastos operativos</p>
+                <p class="text-xl font-bold text-amber-400">€ {{ number_format($operationalCosts, 2, ',', '.') }}</p>
+            </div>
         </div>
+    </div>
+
+    <!-- ── Sección 4b: Gastos Operativos ── -->
+    <div class="glass-card rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-xs font-bold uppercase tracking-widest text-white/40">Gastos Operativos</p>
+            <a href="{{ route('expenses') }}" class="text-xs text-primary font-medium">Ver todos</a>
+        </div>
+        @if($expensesByCategory->isEmpty())
+            <p class="text-slate-500 text-sm text-center py-4">Sin gastos registrados en este período</p>
+        @else
+            @php $maxExp = $expensesByCategory->first()['total'] ?? 1; @endphp
+            <div class="space-y-3">
+                @foreach($expensesByCategory as $exp)
+                    @php $pct = $maxExp > 0 ? ($exp['total'] / $maxExp) * 100 : 0; @endphp
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-amber-400 text-base">{{ $exp['icon'] }}</span>
+                            <span class="text-sm text-slate-200 flex-1">{{ $exp['name'] }}</span>
+                            <span class="text-sm font-bold text-white">€ {{ number_format($exp['total'], 2, ',', '.') }}</span>
+                        </div>
+                        <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div class="h-full bg-amber-400/70 rounded-full" style="width: {{ $pct }}%"></div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 
     <!-- ── Sección 5: Inventario ── -->

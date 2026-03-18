@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             SettingSeeder::class,
             ProductSeeder::class,
+            ExpenseCategorySeeder::class,
         ]);
     }
 }
