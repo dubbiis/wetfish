@@ -57,11 +57,11 @@
                 <span class="material-symbols-outlined text-sm">download</span>
                 PDF
             </a>
-            <button onclick="navigator.share ? navigator.share({title: 'Tickets WetFish', text: '{{ count($selected) }} tickets seleccionados'}) : null"
-                class="h-8 px-3 rounded-lg bg-white/5 text-slate-300 text-xs font-bold flex items-center gap-1 hover:bg-white/10 transition-all">
+            <a href="{{ $this->getShareWhatsappUrl() }}" target="_blank"
+                class="h-8 px-3 rounded-lg bg-[#25D366]/20 text-[#25D366] text-xs font-bold flex items-center gap-1 hover:bg-[#25D366]/30 transition-all">
                 <span class="material-symbols-outlined text-sm">share</span>
-                Compartir
-            </button>
+                WhatsApp
+            </a>
         </div>
     </div>
     @endif

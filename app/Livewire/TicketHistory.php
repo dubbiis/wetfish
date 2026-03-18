@@ -127,6 +127,46 @@ class TicketHistory extends Component
         return route('tickets.export', ['ids' => $ids]);
     }
 
+    public function getShareWhatsappUrl(): string
+    {
+        if (empty($this->selected)) return '';
+
+        $tickets = Ticket::with(['items.product', 'user'])
+            ->whereIn('id', $this->selected)
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($tickets->isEmpty()) return '';
+
+        $business = Setting::get('business_name', 'WetFish');
+        $cif = Setting::get('business_cif', '');
+
+        $text = "🐟 *{$business}*\n";
+        if ($cif) $text .= "CIF: {$cif}\n";
+        $text .= "─────────────\n\n";
+
+        foreach ($tickets as $ticket) {
+            $text .= "*Ticket #{$ticket->id}*\n";
+            $text .= "Fecha: " . $ticket->created_at->format('d/m/Y H:i') . "\n";
+            $text .= "Vendedor: " . ($ticket->user?->name ?? '-') . "\n";
+
+            foreach ($ticket->items as $item) {
+                $name = $item->product?->name ?? 'Producto';
+                $text .= "  {$item->quantity}x {$name} — €" . number_format($item->subtotal, 2, ',', '.') . "\n";
+            }
+
+            $text .= "*Total: €" . number_format($ticket->total, 2, ',', '.') . "*\n\n";
+        }
+
+        $total = $tickets->sum('total');
+        if ($tickets->count() > 1) {
+            $text .= "─────────────\n";
+            $text .= "*TOTAL ({$tickets->count()} tickets): €" . number_format($total, 2, ',', '.') . "*\n";
+        }
+
+        return 'https://wa.me/?text=' . urlencode($text);
+    }
+
     private function getDateRange(): array
     {
         return match ($this->period) {
