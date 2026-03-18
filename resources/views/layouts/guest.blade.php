@@ -23,7 +23,7 @@
                 <span class="material-symbols-outlined text-primary text-4xl">phishing</span>
             </div>
             <h1 class="text-3xl font-bold tracking-tight text-slate-100">WetFish</h1>
-            <p class="text-slate-400 mt-2 text-sm font-medium">Aquatic Management System</p>
+            <p class="text-slate-400 mt-2 text-sm font-medium">Sistema de gestion acuariofilia</p>
         </div>
 
         {{ $slot }}
