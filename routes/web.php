@@ -4,14 +4,27 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Routes for authenticated users
+Route::middleware(['auth'])->group(function () {
 
-Route::middleware('auth')->group(function () {
+    // Admin routes
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/dashboard', \App\Livewire\Dashboard::class)->name('dashboard');
+        Route::get('/stock', \App\Livewire\StockList::class)->name('stock');
+        Route::get('/stock/{product}/edit', \App\Livewire\ProductEdit::class)->name('stock.edit');
+        Route::get('/tickets', \App\Livewire\TicketHistory::class)->name('tickets');
+        Route::get('/expenses', \App\Livewire\Expenses::class)->name('expenses');
+        Route::get('/settings', \App\Livewire\Settings::class)->name('settings');
+    });
+
+    // Shared routes (admin + employee)
+    Route::get('/pos', \App\Livewire\PointOfSale::class)->name('pos');
+    Route::get('/invoices/import', \App\Livewire\InvoiceImporter::class)->name('invoices.import');
+
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

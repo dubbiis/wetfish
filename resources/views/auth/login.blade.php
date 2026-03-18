@@ -1,47 +1,48 @@
 <x-guest-layout>
-    <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" class="w-full space-y-5">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <!-- Email -->
+        <div class="space-y-2">
+            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">Email</label>
+            <input
+                id="email" name="email" type="email" value="{{ old('email') }}"
+                required autofocus autocomplete="username"
+                class="w-full h-14 bg-black/40 border border-white/10 rounded-xl px-4 text-slate-100 placeholder:text-slate-600 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
+                placeholder="admin@wetfish.es"
+            >
+            @error('email')
+                <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+            @enderror
         </div>
 
         <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div class="space-y-2">
+            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">Contraseña</label>
+            <input
+                id="password" name="password" type="password"
+                required autocomplete="current-password"
+                class="w-full h-14 bg-black/40 border border-white/10 rounded-xl px-4 text-slate-100 placeholder:text-slate-600 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
+                placeholder="••••••••"
+            >
+            @error('password')
+                <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+            @enderror
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+        <!-- Remember me -->
+        <div class="flex items-center justify-between px-1">
+            <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" name="remember" class="rounded border-white/10 bg-black/40 text-primary focus:ring-primary/40 size-4">
+                <span class="text-xs text-slate-400 group-hover:text-slate-300 transition-colors">Recordarme</span>
             </label>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
+        <!-- Submit -->
+        <button type="submit" class="w-full h-[52px] bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98] mt-4">
+            Iniciar sesión
+        </button>
     </form>
 </x-guest-layout>
