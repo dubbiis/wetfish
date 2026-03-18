@@ -53,7 +53,7 @@ class Dashboard extends Component
         $inventoryValue    = Product::selectRaw('SUM(stock * cost_price) as total')->value('total') ?? 0;
         $activeProductIds  = $ticketItems->pluck('product_id')->unique()->filter();
         $inactiveProducts  = Product::where('stock', '>', 0)
-            ->whereNotIn('product_id', $activeProductIds)
+            ->whereNotIn('id', $activeProductIds)
             ->count();
 
         // Top 5 products by quantity
