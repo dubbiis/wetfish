@@ -1,24 +1,6 @@
 <div class="space-y-4">
     <x-slot:header>Punto de Venta</x-slot:header>
 
-    @if($showSuccess)
-    <!-- Success Screen -->
-    <div class="flex flex-col items-center justify-center py-12 space-y-6">
-        <div class="size-24 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
-            <span class="material-symbols-outlined text-emerald-400 text-5xl">check_circle</span>
-        </div>
-        <div class="text-center">
-            <h2 class="text-2xl font-bold text-white">Venta completada</h2>
-            <p class="text-white/40 mt-1">Ticket #{{ $lastTicketId }}</p>
-        </div>
-        <div class="flex gap-3 w-full max-w-xs">
-            <button wire:click="newSale"
-                class="flex-1 h-12 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/30 transition-all active:scale-[0.98]">
-                Nueva venta
-            </button>
-        </div>
-    </div>
-    @else
     <!-- Search Products -->
     <div class="relative">
         <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/30">search</span>
@@ -166,6 +148,5 @@
         <span wire:loading.remove wire:target="checkout">Cobrar &euro; {{ number_format($this->total, 2, ',', '.') }}</span>
         <span wire:loading wire:target="checkout" class="material-symbols-outlined animate-spin">progress_activity</span>
     </button>
-    @endif
     @endif
 </div>

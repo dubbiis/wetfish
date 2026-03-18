@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TicketExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -18,6 +19,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/tickets', \App\Livewire\TicketHistory::class)->name('tickets');
         Route::get('/expenses', \App\Livewire\Expenses::class)->name('expenses');
         Route::get('/settings', \App\Livewire\Settings::class)->name('settings');
+        Route::get('/tickets/export', [TicketExportController::class, 'export'])->name('tickets.export');
     });
 
     // Shared routes (admin + employee)

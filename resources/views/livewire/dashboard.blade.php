@@ -31,10 +31,10 @@
             <p class="text-slate-400 text-sm">Beneficio neto</p>
             <p class="text-2xl font-bold text-white">€ {{ number_format($netProfit, 2, ',', '.') }}</p>
         </div>
-        <div class="glass p-5 rounded-xl space-y-2">
+        <a href="{{ route('tickets') }}" class="glass p-5 rounded-xl space-y-2 block">
             <p class="text-slate-400 text-sm">Tickets</p>
             <p class="text-2xl font-bold text-white">{{ $ticketCount }}</p>
-        </div>
+        </a>
         <div class="glass p-5 rounded-xl space-y-2">
             <p class="text-slate-400 text-sm">Ticket promedio</p>
             <p class="text-2xl font-bold text-white">€ {{ number_format($avgTicket, 2, ',', '.') }}</p>

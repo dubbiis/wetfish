@@ -28,10 +28,6 @@ class PointOfSale extends Component
     // Notes
     public string $notes = '';
 
-    // After sale
-    public ?int $lastTicketId = null;
-    public bool $showSuccess = false;
-
     public function addToCart(int $productId): void
     {
         $product = Product::find($productId);
@@ -157,15 +153,8 @@ class PointOfSale extends Component
             Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
         }
 
-        $this->lastTicketId = $ticket->id;
-        $this->showSuccess = true;
         $this->clearCart();
-    }
-
-    public function newSale(): void
-    {
-        $this->showSuccess = false;
-        $this->lastTicketId = null;
+        $this->redirect(route('tickets'), navigate: true);
     }
 
     public function render()
