@@ -5,6 +5,9 @@
 ### README siempre actualizado
 **Cada vez que se añada, modifique o elimine funcionalidad, rutas, modelos, componentes o configuración, actualizar `README.md` en el mismo commit.** El README es la fuente de verdad del estado actual del proyecto.
 
+### Logs y depuración
+**Siempre dejar logs informativos** en scripts, procesos de arranque y puntos críticos del código para poder identificar errores rápidamente. En `start.sh` y similares, usar `echo` para indicar cada paso. En código PHP, usar `Log::info()` o `Log::error()` en puntos clave (importaciones, checkout, seeders, etc.).
+
 ### Idioma
 - Commits, comentarios en código, nombres de variables/métodos: en **inglés** o en **español** según el contexto existente (actualmente el código mezcla ambos, seguir la convención del archivo que se esté editando).
 - Mensajes de commit: **en español**, descriptivos, sin prefijo estricto.
