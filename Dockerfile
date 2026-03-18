@@ -20,22 +20,26 @@ WORKDIR /app
 
 # Copy composer files and install PHP dependencies
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Copy package files and install Node dependencies
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install
 
 # Copy all project files
 COPY . .
 
-# Finish composer install and build assets
-RUN composer dump-autoload --optimize \
-    && npm run build
+# Finish composer and build assets
+RUN composer dump-autoload --optimize
+RUN npm run build
 
-# Make start script executable
-RUN chmod +x start.sh
+# Set permissions
+RUN chmod -R 775 storage bootstrap/cache
+
+# Copy start script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 EXPOSE 8080
 
-CMD ["./start.sh"]
+CMD ["/start.sh"]
