@@ -118,8 +118,9 @@ Los uploads de productos (fotos) se guardan en `storage/app/public/products/`. R
 
 ```
 User (role: admin|employee)
-    └── Ticket (venta)
-           └── TicketItem → Product
+    ├── Ticket (venta)
+    │      └── TicketItem → Product
+    └── Task (assigned_to / created_by)
 
 Category → Product (stock, precios, margen auto)
 
@@ -142,7 +143,10 @@ Setting (key-value: tax_rate, auto_margin_percentage, business_*)
 | `/tickets` | TicketHistory | admin | tickets |
 | `/expenses` | Expenses | admin | expenses |
 | `/settings` | Settings | admin | settings |
+| `/employee/{employee}/tasks` | EmployeeTasks | admin | employee.tasks |
+| `/tickets/export` | TicketExportController | admin | tickets.export |
 | `/pos` | PointOfSale | todos | pos |
+| `/my-tasks` | MyTasks | todos | my-tasks |
 | `/invoices/import` | InvoiceImporter | todos | invoices.import |
 
 ---

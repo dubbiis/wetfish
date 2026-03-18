@@ -28,10 +28,23 @@ TPV (Punto de Venta) y sistema de gestion de stock para tienda de acuariofilia. 
 - Margen automatico configurable sobre precio de coste
 
 ### Historial de Tickets (Admin)
-- Listado de ventas por periodo
-- Total de ingresos del periodo
-- Detalle de cada ticket: productos, cantidades, descuentos, IVA, total
+- Listado de ventas por periodo (hoy, semana, mes, personalizado, todo)
+- Total de ingresos y conteo de tickets del periodo
+- Detalle de cada ticket: datos empresa, productos, cantidades, descuentos, IVA, total
 - Busqueda por numero de ticket o vendedor
+- Seleccion multiple de tickets (individual o todos)
+- Exportar tickets seleccionados a PDF
+- Enviar ticket por WhatsApp al cliente
+- Tras completar venta, redireccion automatica al historial de tickets
+
+### Tareas (Admin → Empleado)
+- El admin asigna tareas a empleados concretos desde Configuracion
+- Cada tarea tiene titulo, descripcion y fecha limite
+- Estados: pendiente, en progreso, completada
+- El empleado ve sus tareas y puede cambiar el estado
+- Filtros por estado en ambas vistas
+- Resumen visual con contadores por estado
+- Indicador de tareas vencidas para el empleado
 
 ### Gastos (Admin)
 - Facturas de compra (proveedores de producto)
@@ -60,8 +73,8 @@ TPV (Punto de Venta) y sistema de gestion de stock para tienda de acuariofilia. 
 
 | Rol | Acceso |
 |-----|--------|
-| **admin** | Dashboard, Stock, Tickets, Gastos, Configuracion, TPV, Facturas |
-| **employee** | TPV, Importador de facturas |
+| **admin** | Dashboard, Stock, Tickets, Gastos, Configuracion, Tareas empleados, TPV, Facturas |
+| **employee** | TPV, Mis Tareas, Importador de facturas |
 
 ## Stack Tecnico
 
@@ -74,6 +87,7 @@ TPV (Punto de Venta) y sistema de gestion de stock para tienda de acuariofilia. 
 | Tailwind CSS | 3 | Estilos |
 | Vite | 7 | Build de assets |
 | PhpSpreadsheet | 5 | Lectura de Excel para importar facturas |
+| DomPDF | 3 | Generacion de tickets en PDF |
 | MySQL | 8 | Base de datos en produccion |
 | Docker | PHP 8.4-cli | Deploy en EasyPanel |
 
@@ -81,7 +95,8 @@ TPV (Punto de Venta) y sistema de gestion de stock para tienda de acuariofilia. 
 
 ```
 User (admin | employee)
-   └── Ticket → TicketItem → Product
+   ├── Ticket → TicketItem → Product
+   └── Task (assigned_to / created_by)
 
 Category → Product
 
@@ -150,16 +165,18 @@ wetfish/
 │   ├── Http/
 │   │   ├── Controllers/Auth/          # Login con redireccion por rol
 │   │   └── Middleware/RoleMiddleware   # Control de acceso por rol
-│   ├── Livewire/                      # 8 componentes
+│   ├── Livewire/                      # 10 componentes
 │   │   ├── Dashboard.php              # Metricas y stats
 │   │   ├── StockList.php              # Listado de productos
 │   │   ├── ProductEdit.php            # Crear/editar producto
-│   │   ├── TicketHistory.php          # Historial de ventas
+│   │   ├── TicketHistory.php          # Historial de ventas + multi-select + export
+│   │   ├── EmployeeTasks.php          # Admin gestiona tareas de un empleado
+│   │   ├── MyTasks.php                # Empleado ve y actualiza sus tareas
 │   │   ├── Expenses.php               # Vista de gastos
 │   │   ├── Settings.php               # Configuracion del negocio
 │   │   ├── PointOfSale.php            # TPV
 │   │   └── InvoiceImporter.php        # Importar facturas Excel
-│   └── Models/                        # 9 modelos Eloquent
+│   └── Models/                        # 10 modelos Eloquent
 │       ├── User.php                   # Auth + roles
 │       ├── Category.php
 │       ├── Product.php                # Stock, precios, margen auto
@@ -168,7 +185,8 @@ wetfish/
 │       ├── TicketItem.php
 │       ├── Invoice.php                # Factura (compra/servicio)
 │       ├── InvoiceItem.php
-│       └── Setting.php               # Key-value config
+│       ├── Setting.php               # Key-value config
+│       └── Task.php                  # Tareas asignadas a empleados
 ├── database/
 │   ├── migrations/                    # 12 migraciones
 │   └── seeders/                       # Admin + categorias + settings
@@ -176,7 +194,8 @@ wetfish/
 │   ├── css/app.css                    # Tailwind + glassmorphism custom
 │   └── views/
 │       ├── layouts/                   # app.blade.php + guest.blade.php
-│       ├── livewire/                  # 8 vistas de componentes
+│       ├── livewire/                  # 10 vistas de componentes
+│       ├── pdf/tickets.blade.php      # Plantilla PDF para tickets
 │       └── auth/login.blade.php       # Login personalizado
 ├── routes/
 │   ├── web.php                        # Rutas protegidas por rol

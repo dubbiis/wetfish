@@ -19,11 +19,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/tickets', \App\Livewire\TicketHistory::class)->name('tickets');
         Route::get('/expenses', \App\Livewire\Expenses::class)->name('expenses');
         Route::get('/settings', \App\Livewire\Settings::class)->name('settings');
+        Route::get('/employee/{employee}/tasks', \App\Livewire\EmployeeTasks::class)->name('employee.tasks');
         Route::get('/tickets/export', [TicketExportController::class, 'export'])->name('tickets.export');
     });
 
     // Shared routes (admin + employee)
     Route::get('/pos', \App\Livewire\PointOfSale::class)->name('pos');
+    Route::get('/my-tasks', \App\Livewire\MyTasks::class)->name('my-tasks');
     Route::get('/invoices/import', \App\Livewire\InvoiceImporter::class)->name('invoices.import');
 
     // Profile

@@ -58,6 +58,7 @@
                 <x-nav-item href="{{ route('settings') }}" icon="settings" label="Config" :active="request()->routeIs('settings')" />
             @else
                 <x-nav-item href="{{ route('pos') }}" icon="point_of_sale" label="Venta" :active="request()->routeIs('pos')" />
+                <x-nav-item href="{{ route('my-tasks') }}" icon="task_alt" label="Tareas" :active="request()->routeIs('my-tasks')" />
                 <x-nav-item href="{{ route('invoices.import') }}" icon="description" label="Facturas" :active="request()->routeIs('invoices*')" />
             @endif
         </div>

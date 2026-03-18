@@ -77,17 +77,18 @@
         <div class="space-y-2">
             @foreach($employees as $emp)
             <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                <div class="flex items-center gap-3">
+                <a href="{{ route('employee.tasks', $emp) }}" class="flex items-center gap-3 flex-1 min-w-0">
                     <div class="size-9 rounded-full bg-primary/20 flex items-center justify-center">
                         <span class="material-symbols-outlined text-primary text-sm">person</span>
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <p class="text-slate-100 font-medium text-sm">{{ $emp->name }}</p>
                         <p class="text-white/40 text-xs">{{ $emp->email }}</p>
                     </div>
-                </div>
+                    <span class="material-symbols-outlined text-white/20 text-sm ml-auto">chevron_right</span>
+                </a>
                 <button wire:click="deleteEmployee({{ $emp->id }})" wire:confirm="¿Eliminar a {{ $emp->name }}?"
-                    class="size-9 rounded-lg bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-all">
+                    class="size-9 rounded-lg bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-all shrink-0 ml-2">
                     <span class="material-symbols-outlined text-red-400 text-sm">delete</span>
                 </button>
             </div>
