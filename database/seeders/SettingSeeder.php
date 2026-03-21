@@ -18,6 +18,10 @@ class SettingSeeder extends Seeder
             'business_phone' => '',
             'business_email' => '',
             'business_logo' => '',
+            'target_margin_percentage' => '30',
+            'expense_calculation_period' => 'month',
+            'price_adjustment_active' => '0',
+            'price_adjustment_percentage' => '0',
         ];
 
         foreach ($defaults as $key => $value) {

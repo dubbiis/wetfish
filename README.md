@@ -16,10 +16,17 @@ TPV (Punto de Venta) y sistema de gestión de stock para tienda de acuariofilia.
 
 ### Dashboard (Admin)
 - Ingresos totales por periodo (hoy, semana, mes)
-- Beneficio neto (ingresos - compras - servicios)
-- Número de tickets y ticket promedio (card enlaza a /tickets)
-- Unidades vendidas
-- Alerta de productos con stock crítico
+- Beneficio neto (ingresos - compras - servicios - gastos operativos)
+- **Margen real vs margen objetivo** — calcula el coste real por producto (precio de compra + gastos operativos / unidades en stock)
+- Barra de progreso visual del margen (verde/ámbar/rojo según proximidad al objetivo)
+- **Sugerencia de hora pico** — cuando detecta hora punta y el margen está por debajo del objetivo, sugiere ajustar precios con enlace directo a Configuración
+- Número de tickets y ticket promedio
+- Top 5 productos por cantidad y por ingresos
+- Ventas por categoría con barras visuales
+- Costes vs Ingresos desglosados
+- Gastos operativos por categoría
+- Inventario: valor total, stock crítico, productos sin movimiento
+- Actividad: hora punta, mejor día, último ticket
 
 ### Gestión de Stock (Admin)
 - Listado de productos con búsqueda y paginación
@@ -47,12 +54,13 @@ TPV (Punto de Venta) y sistema de gestión de stock para tienda de acuariofilia.
 - Resumen visual con contadores por estado
 - Indicador de tareas vencidas para el empleado
 
-### Gastos (Admin)
-- Facturas de compra (proveedores de producto)
-- Facturas de servicio (gastos operativos)
-- Filtros por tipo y periodo
-- Totales separados compras vs servicios
-- Acceso rápido al importador de facturas
+### Gastos Operativos (Admin)
+- Gastos manuales por categoría (luz, agua, teléfono, internet, hosting, alquiler, etc.)
+- Categorías definidas por el usuario (crear, eliminar desde la sección)
+- Filtros por periodo (semana, mes, año, todo)
+- Total del periodo visible
+- Botón "Entrada de peces" enlaza al importador de facturas
+- Los gastos operativos se incluyen en el cálculo de beneficio del dashboard
 
 ### Importador de Facturas
 - Subida de archivos Excel (.xlsx, .xls, .csv)
@@ -67,6 +75,8 @@ TPV (Punto de Venta) y sistema de gestión de stock para tienda de acuariofilia.
 - Datos del negocio (nombre, CIF, dirección, teléfono, email)
 - IVA configurable
 - Porcentaje de margen automático
+- **Margen y coste real** — margen objetivo configurable, período de cálculo de gastos (mes, 3 meses, 6 meses), información de coste operativo por unidad
+- **Ajuste dinámico de precios** — aplicar un porcentaje global a todos los precios de venta, con vista previa de productos, revertir a precios originales
 - Gestión de empleados (crear, eliminar, click para gestionar tareas)
 - Cierre de sesión
 
@@ -105,7 +115,9 @@ Category → Product
 Supplier → Invoice (purchase | service)
               └── InvoiceItem → Product
 
-Setting (key-value)
+ExpenseCategory → Expense (gastos operativos manuales)
+
+Setting (key-value: tax_rate, auto_margin_percentage, target_margin_percentage, expense_calculation_period, price_adjustment_*)
 ```
 
 ### Categorías predefinidas

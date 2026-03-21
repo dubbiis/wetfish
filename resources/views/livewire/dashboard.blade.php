@@ -45,6 +45,66 @@
         </div>
     </div>
 
+    <!-- ── Sección 1b: Margen Real vs Objetivo ── -->
+    <div class="glass-card rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+            <p class="text-xs font-bold uppercase tracking-widest text-white/40">Margen Real</p>
+            @if($priceAdjustmentActive)
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-400/10 text-amber-400 border border-amber-400/20">
+                Ajuste activo
+            </span>
+            @endif
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+                <p class="text-xs text-slate-400">Margen real</p>
+                <p class="text-3xl font-bold {{ $realMarginPct >= $targetMarginPct ? 'text-emerald-400' : ($realMarginPct >= $targetMarginPct * 0.7 ? 'text-amber-400' : 'text-rose-400') }}">
+                    {{ $realMarginPct }}%
+                </p>
+            </div>
+            <div class="space-y-1">
+                <p class="text-xs text-slate-400">Margen objetivo</p>
+                <p class="text-3xl font-bold text-primary">{{ $targetMarginPct }}%</p>
+            </div>
+        </div>
+
+        <!-- Barra de progreso -->
+        @php $progressPct = $targetMarginPct > 0 ? min(($realMarginPct / $targetMarginPct) * 100, 100) : 0; @endphp
+        <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+            <div class="h-full rounded-full transition-all {{ $realMarginPct >= $targetMarginPct ? 'bg-emerald-400' : ($realMarginPct >= $targetMarginPct * 0.7 ? 'bg-amber-400' : 'bg-rose-400') }}"
+                 style="width: {{ max($progressPct, 0) }}%"></div>
+        </div>
+
+        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+            <span>Coste op./unidad: € {{ number_format($costPerUnit, 4, ',', '.') }}</span>
+            <span>Unidades: {{ number_format($totalUnitsInStock) }}</span>
+            <span>Período: {{ $expensePeriodLabel }}</span>
+        </div>
+    </div>
+
+    <!-- Sugerencia hora pico -->
+    @if($showPeakSuggestion)
+    <div class="glass-card rounded-2xl p-4 border border-amber-400/20 space-y-3">
+        <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-amber-400 text-xl mt-0.5">trending_up</span>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-white">Hora pico detectada ({{ str_pad($peakHour, 2, '0', STR_PAD_LEFT) }}:00h)</p>
+                <p class="text-xs text-slate-400 mt-1">
+                    Margen real <span class="text-amber-400 font-semibold">{{ $realMarginPct }}%</span>
+                    — Objetivo <span class="text-primary font-semibold">{{ $targetMarginPct }}%</span>
+                    — Subir <span class="text-white font-semibold">+{{ $suggestedAdjustment }}%</span>
+                </p>
+            </div>
+        </div>
+        <a href="{{ route('settings') }}"
+            class="flex items-center justify-center gap-2 h-10 w-full rounded-xl bg-amber-400/10 border border-amber-400/20 text-amber-400 text-sm font-semibold transition-all active:scale-[0.98]">
+            <span class="material-symbols-outlined text-base">tune</span>
+            Ajustar precios
+        </a>
+    </div>
+    @endif
+
     <!-- ── Sección 2: Top Productos ── -->
     <div class="glass-card rounded-2xl p-4" x-data="{ tab: 'qty' }">
         <p class="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Top Productos</p>

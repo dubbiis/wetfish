@@ -95,6 +95,15 @@ class ProductEdit extends Component
             'auto_margin' => $this->auto_margin,
         ];
 
+        // Manejar base_sale_price con ajuste global activo
+        if (Setting::get('price_adjustment_active', '0') === '1') {
+            $pct = (float) Setting::get('price_adjustment_percentage', 0);
+            $data['base_sale_price'] = $data['sale_price'];
+            $data['sale_price'] = round($data['sale_price'] * (1 + $pct / 100), 2);
+        } else {
+            $data['base_sale_price'] = $data['sale_price'];
+        }
+
         if ($this->photo) {
             $data['photo'] = $this->photo->store('products', 'public');
         }

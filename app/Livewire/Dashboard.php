@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Models\Ticket;
 use App\Models\TicketItem;
 use Illuminate\Support\Carbon;
@@ -121,20 +122,65 @@ class Dashboard extends Component
             $bestDay = $dayNames[$bestDayIndex] ?? null;
         }
 
-        Log::info('Dashboard rendered', ['period' => $this->period, 'revenue' => $revenue]);
+        // Real cost calculation (independent expense period from Settings)
+        $realCostData = $this->calculateRealCosts();
+        $costPerUnit = $realCostData['costPerUnit'];
+        $totalUnitsInStock = $realCostData['totalUnitsInStock'];
+        $expensePeriodLabel = $realCostData['expensePeriodLabel'];
+
+        $totalRealCost = $ticketItems->sum(function ($item) use ($costPerUnit) {
+            $productCost = (float) ($item->product?->cost_price ?? 0);
+            return ($productCost + $costPerUnit) * $item->quantity;
+        });
+
+        $realMarginPct = $revenue > 0 ? round(($revenue - $totalRealCost) / $revenue * 100, 1) : 0;
+        $targetMarginPct = (float) Setting::get('target_margin_percentage', 30);
+        $priceAdjustmentActive = Setting::get('price_adjustment_active', '0') === '1';
+
+        // Peak hour suggestion
+        $showPeakSuggestion = $peakHour !== null
+            && $realMarginPct < $targetMarginPct
+            && $ticketCount >= 3;
+        $suggestedAdjustment = round($targetMarginPct - $realMarginPct, 1);
+
+        Log::info('Dashboard rendered', ['period' => $this->period, 'revenue' => $revenue, 'realMarginPct' => $realMarginPct]);
 
         return view('livewire.dashboard', compact(
             'revenue', 'netProfit', 'ticketCount', 'avgTicket', 'unitsSold',
             'maxTicket', 'lastTicket', 'purchaseCosts', 'serviceCosts', 'operationalCosts', 'marginPct',
             'criticalProducts', 'inventoryValue', 'inactiveProducts',
             'topProductsByQty', 'topProductsByRevenue', 'salesByCategory',
-            'expensesByCategory', 'peakHour', 'bestDay'
+            'expensesByCategory', 'peakHour', 'bestDay',
+            'realMarginPct', 'targetMarginPct', 'costPerUnit', 'totalUnitsInStock',
+            'expensePeriodLabel', 'showPeakSuggestion', 'suggestedAdjustment', 'priceAdjustmentActive'
         ));
     }
 
     public function setPeriod(string $period): void
     {
         $this->period = $period;
+    }
+
+    private function calculateRealCosts(): array
+    {
+        $expensePeriod = Setting::get('expense_calculation_period', 'month');
+        $expenseRange = match ($expensePeriod) {
+            '3months' => ['start' => Carbon::now()->subMonths(3), 'end' => Carbon::now()],
+            '6months' => ['start' => Carbon::now()->subMonths(6), 'end' => Carbon::now()],
+            default   => ['start' => Carbon::now()->startOfMonth(), 'end' => Carbon::now()],
+        };
+
+        $totalExpenses = Expense::whereBetween('date', [$expenseRange['start'], $expenseRange['end']])->sum('amount');
+        $totalUnitsInStock = Product::where('stock', '>', 0)->sum('stock');
+        $costPerUnit = $totalUnitsInStock > 0 ? round($totalExpenses / $totalUnitsInStock, 4) : 0;
+
+        $expensePeriodLabel = match ($expensePeriod) {
+            '3months' => '3 meses',
+            '6months' => '6 meses',
+            default   => 'Mes actual',
+        };
+
+        return compact('totalExpenses', 'totalUnitsInStock', 'costPerUnit', 'expensePeriodLabel');
     }
 
     private function getDateRange(): array

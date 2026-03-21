@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'category_id', 'code', 'name', 'cost_price', 'sale_price',
+        'category_id', 'code', 'name', 'cost_price', 'sale_price', 'base_sale_price',
         'stock', 'min_stock', 'auto_margin', 'photo',
     ];
 
@@ -16,6 +16,7 @@ class Product extends Model
         return [
             'cost_price' => 'decimal:2',
             'sale_price' => 'decimal:2',
+            'base_sale_price' => 'decimal:2',
             'auto_margin' => 'boolean',
         ];
     }

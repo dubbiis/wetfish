@@ -158,13 +158,20 @@ class InvoiceImporter extends Component
             $productId = $item['matched_product_id'];
 
             // Create new product if needed
+            $adjustmentActive = Setting::get('price_adjustment_active', '0') === '1';
+            $adjPct = $adjustmentActive ? (float) Setting::get('price_adjustment_percentage', 0) : 0;
+
             if ($item['is_new'] && !$productId) {
-                $salePrice = round($item['unit_cost'] * (1 + $marginPct / 100), 2);
+                $baseSalePrice = round($item['unit_cost'] * (1 + $marginPct / 100), 2);
+                $finalSalePrice = $adjustmentActive
+                    ? round($baseSalePrice * (1 + $adjPct / 100), 2)
+                    : $baseSalePrice;
                 $product = Product::create([
                     'code' => $item['code'] ?: null,
                     'name' => $item['name'],
                     'cost_price' => $item['unit_cost'],
-                    'sale_price' => $salePrice,
+                    'sale_price' => $finalSalePrice,
+                    'base_sale_price' => $baseSalePrice,
                     'stock' => $item['quantity'],
                     'min_stock' => 5,
                     'auto_margin' => true,
@@ -177,7 +184,11 @@ class InvoiceImporter extends Component
                     $product->stock += $item['quantity'];
                     $product->cost_price = $item['unit_cost'];
                     if ($product->auto_margin) {
-                        $product->sale_price = round($item['unit_cost'] * (1 + $marginPct / 100), 2);
+                        $baseSalePrice = round($item['unit_cost'] * (1 + $marginPct / 100), 2);
+                        $product->base_sale_price = $baseSalePrice;
+                        $product->sale_price = $adjustmentActive
+                            ? round($baseSalePrice * (1 + $adjPct / 100), 2)
+                            : $baseSalePrice;
                     }
                     $product->save();
                 }
