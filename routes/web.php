@@ -21,6 +21,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/settings', \App\Livewire\Settings::class)->name('settings');
         Route::get('/employee/{employee}/tasks', \App\Livewire\EmployeeTasks::class)->name('employee.tasks');
         Route::get('/tickets/export', [TicketExportController::class, 'export'])->name('tickets.export');
+        Route::get('/reports/coste-real', function () {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reports.informe-coste-real');
+            $pdf->setPaper('a4', 'portrait');
+            return $pdf->download('WetFish-Informe-Coste-Real.pdf');
+        })->name('reports.coste-real');
     });
 
     // Shared routes (admin + employee)
