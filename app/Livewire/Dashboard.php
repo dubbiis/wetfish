@@ -47,9 +47,26 @@ class Dashboard extends Component
         $serviceCosts = Invoice::where('type', 'service')
             ->whereBetween('invoice_date', [$range['start'], $range['end']])
             ->sum('total');
-        $operationalCosts = Expense::whereBetween('date', [$range['start'], $range['end']])->sum('amount');
-        $netProfit        = $revenue - $purchaseCosts - $serviceCosts - $operationalCosts;
-        $marginPct        = $revenue > 0 ? round(($netProfit / $revenue) * 100, 1) : 0;
+        // Gastos operativos: base (sin IVA) y total (con IVA)
+        $operationalBase = Expense::whereBetween('date', [$range['start'], $range['end']])->sum('amount');
+        $operationalTax  = Expense::whereBetween('date', [$range['start'], $range['end']])->sum('tax_amount');
+        $operationalCosts = $operationalBase; // Para beneficio se usa la base (IVA es deducible)
+        $operationalTotal = $operationalBase + $operationalTax; // Total con IVA (lo que realmente sale de caja)
+
+        // IVA repercutido (cobrado en ventas)
+        $ivaRepercutido = $allTickets->sum('tax_amount');
+        // IVA soportado (pagado en gastos operativos)
+        $ivaSoportado = $operationalTax;
+        // Balance fiscal: lo que hay que pagar a Hacienda
+        $ivaBalance = $ivaRepercutido - $ivaSoportado;
+
+        // Beneficio neto usando base imponible (sin IVA = coste real)
+        $netProfit = $revenue - $purchaseCosts - $serviceCosts - $operationalBase;
+        $marginPct = $revenue > 0 ? round(($netProfit / $revenue) * 100, 1) : 0;
+
+        // Beneficio bruto con IVA incluido (lo que realmente paga de caja)
+        $netProfitWithTax = $revenue - $purchaseCosts - $serviceCosts - $operationalTotal;
+        $marginPctWithTax = $revenue > 0 ? round(($netProfitWithTax / $revenue) * 100, 1) : 0;
 
         // Gastos operativos por categoría para el dashboard
         $expensesByCategory = Expense::with('category')
@@ -59,7 +76,9 @@ class Dashboard extends Component
             ->map(fn($items) => [
                 'name'  => $items->first()->category?->name ?? 'Sin categoría',
                 'icon'  => $items->first()->category?->icon ?? 'receipt',
-                'total' => $items->sum('amount'),
+                'base'  => $items->sum('amount'),
+                'tax'   => $items->sum('tax_amount'),
+                'total' => $items->sum('amount') + $items->sum('tax_amount'),
             ])
             ->sortByDesc('total')
             ->values();
@@ -146,8 +165,10 @@ class Dashboard extends Component
         Log::info('Dashboard rendered', ['period' => $this->period, 'revenue' => $revenue, 'realMarginPct' => $realMarginPct]);
 
         return view('livewire.dashboard', compact(
-            'revenue', 'netProfit', 'ticketCount', 'avgTicket', 'unitsSold',
-            'maxTicket', 'lastTicket', 'purchaseCosts', 'serviceCosts', 'operationalCosts', 'marginPct',
+            'revenue', 'netProfit', 'netProfitWithTax', 'ticketCount', 'avgTicket', 'unitsSold',
+            'maxTicket', 'lastTicket', 'purchaseCosts', 'serviceCosts',
+            'operationalCosts', 'operationalTotal', 'operationalTax', 'marginPct', 'marginPctWithTax',
+            'ivaRepercutido', 'ivaSoportado', 'ivaBalance',
             'criticalProducts', 'inventoryValue', 'inactiveProducts',
             'topProductsByQty', 'topProductsByRevenue', 'salesByCategory',
             'expensesByCategory', 'peakHour', 'bestDay',

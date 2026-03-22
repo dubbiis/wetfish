@@ -28,7 +28,11 @@
     <!-- Total -->
     <div class="glass rounded-xl p-6 relative overflow-hidden">
         <p class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1">Total gastos operativos</p>
-        <h2 class="text-4xl font-bold text-white tracking-tight">€ {{ number_format($total, 2, ',', '.') }}</h2>
+        <h2 class="text-4xl font-bold text-white tracking-tight">&euro; {{ number_format($total, 2, ',', '.') }}</h2>
+        <div class="flex gap-4 mt-2 text-xs">
+            <span class="text-slate-400">Base: <span class="text-white font-semibold">&euro; {{ number_format($totalBase, 2, ',', '.') }}</span></span>
+            <span class="text-slate-400">IVA: <span class="text-amber-400 font-semibold">&euro; {{ number_format($totalTax, 2, ',', '.') }}</span></span>
+        </div>
         <div class="absolute -bottom-10 -right-10 h-40 w-40 bg-primary/10 blur-3xl rounded-full"></div>
     </div>
 
@@ -63,7 +67,10 @@
                 </p>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-                <p class="text-lg font-bold text-white">€ {{ number_format($expense->amount, 2, ',', '.') }}</p>
+                <div class="text-right">
+                    <p class="text-lg font-bold text-white">&euro; {{ number_format($expense->total, 2, ',', '.') }}</p>
+                    <p class="text-[10px] text-white/30">{{ number_format($expense->tax_rate, 0) }}% IVA</p>
+                </div>
                 <button wire:click="openEdit({{ $expense->id }})"
                     class="size-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all">
                     <span class="material-symbols-outlined text-base">edit</span>
@@ -119,19 +126,37 @@
                     @error('concept') <p class="text-rose-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-3 gap-3" x-data="{
+                    base: $wire.entangle('amount'),
+                    rate: $wire.entangle('taxRate'),
+                    get taxAmt() { return (parseFloat(this.base) || 0) * (parseFloat(this.rate) || 0) / 100; },
+                    get total() { return (parseFloat(this.base) || 0) + this.taxAmt; }
+                }">
                     <div>
-                        <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Importe (€)</label>
-                        <input wire:model="amount" type="number" step="0.01" min="0" placeholder="0.00"
+                        <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Base (&euro;)</label>
+                        <input wire:model.live="amount" type="number" step="0.01" min="0" placeholder="0.00"
                             class="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder:text-white/30 focus:ring-1 focus:ring-primary/50">
                         @error('amount') <p class="text-rose-400 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Fecha</label>
-                        <input wire:model="date" type="date"
-                            class="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:ring-1 focus:ring-primary/50">
-                        @error('date') <p class="text-rose-400 text-xs mt-1">{{ $message }}</p> @enderror
+                        <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">IVA %</label>
+                        <input wire:model.live="taxRate" type="number" step="1" min="0" max="100"
+                            class="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-center focus:ring-1 focus:ring-primary/50">
+                        @error('taxRate') <p class="text-rose-400 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
+                    <div>
+                        <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Total</label>
+                        <div class="w-full h-12 px-4 bg-white/5 border border-white/5 rounded-xl flex items-center text-emerald-400 font-bold">
+                            &euro; <span x-text="total.toFixed(2)" class="ml-1"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Fecha</label>
+                    <input wire:model="date" type="date"
+                        class="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:ring-1 focus:ring-primary/50">
+                    @error('date') <p class="text-rose-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="pb-2">

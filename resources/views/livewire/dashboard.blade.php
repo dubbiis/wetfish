@@ -198,23 +198,55 @@
         <div class="grid grid-cols-2 gap-3">
             <div class="space-y-1">
                 <p class="text-xs text-slate-400">Ingresos</p>
-                <p class="text-xl font-bold text-emerald-400">€ {{ number_format($revenue, 2, ',', '.') }}</p>
-            </div>
-            <div class="space-y-1">
-                <p class="text-xs text-slate-400">Margen neto</p>
-                <p class="text-xl font-bold {{ $marginPct >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">{{ $marginPct }}%</p>
+                <p class="text-xl font-bold text-emerald-400">&euro; {{ number_format($revenue, 2, ',', '.') }}</p>
             </div>
             <div class="space-y-1">
                 <p class="text-xs text-slate-400">Compras</p>
-                <p class="text-xl font-bold text-rose-400">€ {{ number_format($purchaseCosts, 2, ',', '.') }}</p>
+                <p class="text-xl font-bold text-rose-400">&euro; {{ number_format($purchaseCosts, 2, ',', '.') }}</p>
             </div>
             <div class="space-y-1">
                 <p class="text-xs text-slate-400">Servicios</p>
-                <p class="text-xl font-bold text-orange-400">€ {{ number_format($serviceCosts, 2, ',', '.') }}</p>
+                <p class="text-xl font-bold text-orange-400">&euro; {{ number_format($serviceCosts, 2, ',', '.') }}</p>
             </div>
-            <div class="space-y-1 col-span-2 pt-2 border-t border-white/5">
-                <p class="text-xs text-slate-400">Gastos operativos</p>
-                <p class="text-xl font-bold text-amber-400">€ {{ number_format($operationalCosts, 2, ',', '.') }}</p>
+            <div class="space-y-1">
+                <p class="text-xs text-slate-400">Gastos op. (base)</p>
+                <p class="text-xl font-bold text-amber-400">&euro; {{ number_format($operationalCosts, 2, ',', '.') }}</p>
+            </div>
+        </div>
+
+        <!-- Doble margen -->
+        <div class="mt-4 pt-3 border-t border-white/5 grid grid-cols-2 gap-3">
+            <div class="bg-white/5 rounded-xl p-3 space-y-1">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-white/40">Beneficio (sin IVA)</p>
+                <p class="text-lg font-bold {{ $netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">&euro; {{ number_format($netProfit, 2, ',', '.') }}</p>
+                <p class="text-xs text-slate-500">Margen {{ $marginPct }}%</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-3 space-y-1">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-white/40">Beneficio (con IVA)</p>
+                <p class="text-lg font-bold {{ $netProfitWithTax >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">&euro; {{ number_format($netProfitWithTax, 2, ',', '.') }}</p>
+                <p class="text-xs text-slate-500">Margen {{ $marginPctWithTax }}%</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Sección 4a: Resumen Fiscal (IVA) ── -->
+    <div class="glass-card rounded-2xl p-4">
+        <p class="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">Resumen Fiscal</p>
+        <div class="grid grid-cols-3 gap-3">
+            <div class="space-y-1">
+                <p class="text-xs text-slate-400">IVA cobrado</p>
+                <p class="text-lg font-bold text-emerald-400">&euro; {{ number_format($ivaRepercutido, 2, ',', '.') }}</p>
+                <p class="text-[10px] text-slate-500">Repercutido</p>
+            </div>
+            <div class="space-y-1">
+                <p class="text-xs text-slate-400">IVA pagado</p>
+                <p class="text-lg font-bold text-rose-400">&euro; {{ number_format($ivaSoportado, 2, ',', '.') }}</p>
+                <p class="text-[10px] text-slate-500">Soportado</p>
+            </div>
+            <div class="space-y-1">
+                <p class="text-xs text-slate-400">A pagar</p>
+                <p class="text-lg font-bold {{ $ivaBalance >= 0 ? 'text-amber-400' : 'text-emerald-400' }}">&euro; {{ number_format($ivaBalance, 2, ',', '.') }}</p>
+                <p class="text-[10px] text-slate-500">{{ $ivaBalance >= 0 ? 'Debes' : 'A favor' }}</p>
             </div>
         </div>
     </div>
@@ -236,7 +268,10 @@
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-amber-400 text-base">{{ $exp['icon'] }}</span>
                             <span class="text-sm text-slate-200 flex-1">{{ $exp['name'] }}</span>
-                            <span class="text-sm font-bold text-white">€ {{ number_format($exp['total'], 2, ',', '.') }}</span>
+                            <div class="text-right">
+                                <span class="text-sm font-bold text-white">&euro; {{ number_format($exp['total'], 2, ',', '.') }}</span>
+                                <span class="text-[10px] text-white/30 block">base {{ number_format($exp['base'], 2, ',', '.') }} + IVA {{ number_format($exp['tax'], 2, ',', '.') }}</span>
+                            </div>
                         </div>
                         <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
                             <div class="h-full bg-amber-400/70 rounded-full" style="width: {{ $pct }}%"></div>

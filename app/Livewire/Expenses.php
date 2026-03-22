@@ -25,6 +25,7 @@ class Expenses extends Component
     public string $categoryId   = '';
     public string $concept      = '';
     public string $amount       = '';
+    public string $taxRate      = '21';
     public string $date         = '';
     public string $notes        = '';
 
@@ -41,7 +42,8 @@ class Expenses extends Component
 
     public function openAdd(): void
     {
-        $this->reset('editingId', 'categoryId', 'concept', 'amount', 'notes');
+        $this->reset('editingId', 'categoryId', 'concept', 'amount', 'taxRate', 'notes');
+        $this->taxRate      = '21';
         $this->date         = now()->toDateString();
         $this->showAddModal = true;
     }
@@ -53,6 +55,7 @@ class Expenses extends Component
         $this->categoryId = (string) $expense->expense_category_id;
         $this->concept    = $expense->concept;
         $this->amount     = (string) $expense->amount;
+        $this->taxRate    = (string) $expense->tax_rate;
         $this->date       = $expense->date->toDateString();
         $this->notes      = $expense->notes ?? '';
         $this->showAddModal = true;
@@ -70,14 +73,21 @@ class Expenses extends Component
             'categoryId' => 'required|exists:expense_categories,id',
             'concept'    => 'required|string|max:255',
             'amount'     => 'required|numeric|min:0.01',
+            'taxRate'    => 'required|numeric|min:0|max:100',
             'date'       => 'required|date',
             'notes'      => 'nullable|string|max:500',
         ]);
 
+        $base = (float) $data['amount'];
+        $rate = (float) $data['taxRate'];
+        $taxAmount = round($base * $rate / 100, 2);
+
         $payload = [
             'expense_category_id' => $data['categoryId'],
             'concept'             => $data['concept'],
-            'amount'              => $data['amount'],
+            'amount'              => $base,
+            'tax_rate'            => $rate,
+            'tax_amount'          => $taxAmount,
             'date'                => $data['date'],
             'notes'               => $data['notes'] ?: null,
         ];
@@ -149,11 +159,13 @@ class Expenses extends Component
             ->orderByDesc('date')
             ->paginate(20);
 
-        $total = Expense::whereBetween('date', [$range['start'], $range['end']])->sum('amount');
+        $totalBase = Expense::whereBetween('date', [$range['start'], $range['end']])->sum('amount');
+        $totalTax  = Expense::whereBetween('date', [$range['start'], $range['end']])->sum('tax_amount');
+        $total     = $totalBase + $totalTax;
 
         $categories = ExpenseCategory::orderBy('name')->get();
 
-        return view('livewire.expenses', compact('expenses', 'total', 'categories'));
+        return view('livewire.expenses', compact('expenses', 'total', 'totalBase', 'totalTax', 'categories'));
     }
 
     private function getDateRange(): array
