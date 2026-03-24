@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\AiUsageLog;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Product;
@@ -162,6 +163,14 @@ class Dashboard extends Component
             && $ticketCount >= 3;
         $suggestedAdjustment = round($targetMarginPct - $realMarginPct, 1);
 
+        // AI usage stats (always current month)
+        $aiMonthStart = Carbon::now()->startOfMonth();
+        $aiUsageMonth = AiUsageLog::where('created_at', '>=', $aiMonthStart)->get();
+        $aiTokensIn   = $aiUsageMonth->sum('tokens_input');
+        $aiTokensOut  = $aiUsageMonth->sum('tokens_output');
+        $aiCostMonth  = $aiUsageMonth->sum('cost_eur');
+        $aiCallsMonth = $aiUsageMonth->count();
+
         Log::info('Dashboard rendered', ['period' => $this->period, 'revenue' => $revenue, 'realMarginPct' => $realMarginPct]);
 
         return view('livewire.dashboard', compact(
@@ -173,7 +182,8 @@ class Dashboard extends Component
             'topProductsByQty', 'topProductsByRevenue', 'salesByCategory',
             'expensesByCategory', 'peakHour', 'bestDay',
             'realMarginPct', 'targetMarginPct', 'costPerUnit', 'totalUnitsInStock',
-            'expensePeriodLabel', 'showPeakSuggestion', 'suggestedAdjustment', 'priceAdjustmentActive'
+            'expensePeriodLabel', 'showPeakSuggestion', 'suggestedAdjustment', 'priceAdjustmentActive',
+            'aiTokensIn', 'aiTokensOut', 'aiCostMonth', 'aiCallsMonth'
         ));
     }
 

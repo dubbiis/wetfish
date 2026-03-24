@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AiUsageLog;
 use Illuminate\Support\Facades\Log;
 use OpenAI\Laravel\Facades\OpenAI;
 use Smalot\PdfParser\Parser as PdfParser;
@@ -67,7 +68,7 @@ PROMPT;
     {
         $content = $this->buildContent(self::INVOICE_PROMPT, $filePath, $mimeType);
 
-        $response = $this->callOpenAI($content);
+        $response = $this->callOpenAI($content, 'invoice');
         $data = $this->parseJson($response);
 
         Log::info('InvoiceVision: factura extraída', [
@@ -85,7 +86,7 @@ PROMPT;
     {
         $content = $this->buildContent(self::EXPENSE_PROMPT, $filePath, $mimeType);
 
-        $response = $this->callOpenAI($content);
+        $response = $this->callOpenAI($content, 'expense');
         $data = $this->parseJson($response);
 
         Log::info('InvoiceVision: gasto extraído', [
@@ -143,11 +144,13 @@ PROMPT;
     /**
      * Llama a la API de OpenAI.
      */
-    private function callOpenAI(array $content): string
+    private function callOpenAI(array $content, string $type = 'invoice'): string
     {
         try {
+            $model = env('OPENAI_MODEL', 'gpt-4o-mini');
+
             $response = OpenAI::chat()->create([
-                'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+                'model' => $model,
                 'messages' => [
                     [
                         'role' => 'user',
@@ -157,6 +160,18 @@ PROMPT;
                 'max_tokens' => 4096,
                 'temperature' => 0.1,
             ]);
+
+            // Registrar uso de tokens
+            $usage = $response->usage;
+            if ($usage) {
+                AiUsageLog::create([
+                    'type' => $type,
+                    'model' => $model,
+                    'tokens_input' => $usage->promptTokens,
+                    'tokens_output' => $usage->completionTokens,
+                    'cost_eur' => AiUsageLog::calculateCost($model, $usage->promptTokens, $usage->completionTokens),
+                ]);
+            }
 
             return $response->choices[0]->message->content;
         } catch (\Exception $e) {

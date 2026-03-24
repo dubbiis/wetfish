@@ -337,4 +337,45 @@
             @endif
         </div>
     </div>
+
+    <!-- ── Sección 7: Uso de IA ── -->
+    <div class="glass-card rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">smart_toy</span>
+                <h3 class="text-sm font-bold uppercase tracking-widest text-white/50">Uso de IA</h3>
+            </div>
+            <span class="text-xs text-white/30">{{ now()->translatedFormat('F Y') }}</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white/5 rounded-xl p-3 space-y-1">
+                <p class="text-xs text-white/40">Llamadas</p>
+                <p class="text-lg font-bold text-white">{{ $aiCallsMonth }}</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-3 space-y-1">
+                <p class="text-xs text-white/40">Coste mes</p>
+                <p class="text-lg font-bold {{ $aiCostMonth > 1 ? 'text-amber-400' : 'text-emerald-400' }}">
+                    {{ number_format($aiCostMonth, 4, ',', '.') }} &euro;
+                </p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-3 space-y-1">
+                <p class="text-xs text-white/40">Tokens entrada</p>
+                <p class="text-sm font-semibold text-white">{{ number_format($aiTokensIn, 0, ',', '.') }}</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-3 space-y-1">
+                <p class="text-xs text-white/40">Tokens salida</p>
+                <p class="text-sm font-semibold text-white">{{ number_format($aiTokensOut, 0, ',', '.') }}</p>
+            </div>
+        </div>
+
+        @if($aiCallsMonth > 0)
+        <p class="text-xs text-white/30 text-center">
+            Media: {{ number_format(($aiTokensIn + $aiTokensOut) / max($aiCallsMonth, 1), 0, ',', '.') }} tokens/llamada
+            · {{ number_format($aiCostMonth / max($aiCallsMonth, 1), 4, ',', '.') }} &euro;/llamada
+        </p>
+        @else
+        <p class="text-xs text-white/30 text-center">Sin uso de IA este mes</p>
+        @endif
+    </div>
 </div>
