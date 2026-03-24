@@ -57,18 +57,29 @@ class InvoiceImporter extends Component
             $service = app(InvoiceVisionService::class);
             $data = $service->extractInvoice($path, $mimeType);
 
-            // Auto-fill header from AI response
-            $this->invoiceNumber = $data['invoice_number'] ?? '';
-            $this->invoiceDate = $data['invoice_date'] ?? now()->format('Y-m-d');
+            Log::info('InvoiceImporter: respuesta IA', ['data' => $data]);
 
-            if (!empty($data['supplier_name'])) {
-                $supplier = Supplier::where('name', 'like', '%' . $data['supplier_name'] . '%')->first();
+            // Auto-fill header from AI response
+            $supplierName = is_string($data['supplier_name'] ?? null) ? trim($data['supplier_name']) : '';
+            $invoiceNum   = is_string($data['invoice_number'] ?? null) ? trim($data['invoice_number']) : '';
+            $invoiceDate  = is_string($data['invoice_date'] ?? null) ? trim($data['invoice_date']) : '';
+
+            $this->invoiceNumber = $invoiceNum;
+            $this->invoiceDate   = $invoiceDate ?: now()->format('Y-m-d');
+
+            if ($supplierName !== '') {
+                $supplier = Supplier::where('name', 'like', '%' . $supplierName . '%')->first();
                 if ($supplier) {
                     $this->supplier_id = $supplier->id;
                 } else {
-                    $this->newSupplierName = $data['supplier_name'];
+                    $this->newSupplierName = $supplierName;
                 }
             }
+
+            // Auto-generar concepto
+            $this->concept = $supplierName
+                ? 'Factura ' . $supplierName . ($invoiceNum ? ' #' . $invoiceNum : '')
+                : '';
 
             // Parse items
             $this->items = [];
