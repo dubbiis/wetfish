@@ -167,14 +167,19 @@
         <div class="space-y-3 max-h-[55vh] overflow-y-auto">
             @foreach($items as $index => $item)
             <div class="glass-card rounded-xl p-4 space-y-2">
-                <div class="flex items-start justify-between">
+                <div class="flex items-start justify-between gap-2">
                     <div class="flex-1 min-w-0">
                         <p class="text-slate-100 font-semibold text-sm truncate">{{ $item['name'] }}</p>
                         <p class="text-white/40 text-xs">
                             {{ $item['code'] ? $item['code'] . ' · ' : '' }}{{ $item['quantity'] }} uds x &euro; {{ number_format($item['unit_cost'], 2, ',', '.') }}
                         </p>
                     </div>
-                    <p class="font-bold text-slate-100">&euro; {{ number_format($item['total'], 2, ',', '.') }}</p>
+                    <p class="font-bold text-slate-100 shrink-0">&euro; {{ number_format($item['total'], 2, ',', '.') }}</p>
+                    <button wire:click="removeItem({{ $index }})"
+                        class="size-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 hover:text-rose-300 shrink-0 transition-all"
+                        title="Eliminar producto">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
                 </div>
 
                 <!-- Match status -->

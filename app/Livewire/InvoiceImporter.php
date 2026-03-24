@@ -146,6 +146,12 @@ class InvoiceImporter extends Component
         $this->step = 3;
     }
 
+    public function removeItem(int $index): void
+    {
+        array_splice($this->items, $index, 1);
+        $this->items = array_values($this->items);
+    }
+
     public function toggleNewProduct(int $index): void
     {
         $this->items[$index]['is_new'] = !$this->items[$index]['is_new'];

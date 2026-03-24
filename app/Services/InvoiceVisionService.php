@@ -10,32 +10,34 @@ use Smalot\PdfParser\Parser as PdfParser;
 class InvoiceVisionService
 {
     private const INVOICE_PROMPT = <<<'PROMPT'
-Eres un sistema de extracción de datos de facturas de proveedores. Analiza el documento proporcionado y extrae TODOS los productos/artículos listados.
+Eres un sistema de extracción de datos de facturas de proveedores de acuariofilia (plantas acuáticas, peces, accesorios). Analiza el documento proporcionado y extrae ABSOLUTAMENTE TODOS los productos/artículos listados.
 
 Devuelve EXCLUSIVAMENTE un JSON válido con esta estructura exacta, sin texto adicional:
 
 {
   "invoice_number": "string o null",
   "invoice_date": "YYYY-MM-DD o null",
-  "supplier_name": "string o null",
+  "supplier_name": "nombre de la empresa proveedora o null",
   "items": [
     {
-      "code": "código del producto o referencia, cadena vacía si no hay",
-      "name": "nombre/descripción del producto",
+      "code": "código/referencia del producto (ej: 11 3112, 22 1104), cadena vacía si no hay",
+      "name": "nombre completo del producto/planta/pez",
       "quantity": 1,
       "unit_cost": 0.00
     }
   ]
 }
 
-Reglas:
-- Extrae TODOS los productos/líneas de la factura, no omitas ninguno.
-- Los precios deben ser unitarios y SIN IVA. Si solo aparece precio con IVA, divide entre (1 + tipo_IVA/100).
-- Si no puedes determinar el precio sin IVA, usa el precio que aparezca.
-- Los códigos de producto pueden aparecer como "Ref.", "Cod.", "SKU", "Art." o similar.
-- quantity debe ser un número. Si aparece un decimal, úsalo tal cual.
-- unit_cost debe ser un número decimal con 2 decimales.
-- Si el documento no es una factura o no contiene productos, devuelve {"items": [], "error": "No se detectaron productos"}.
+Reglas CRÍTICAS:
+- Extrae ABSOLUTAMENTE TODAS las líneas de productos. NO omitas ninguna, aunque haya 30, 50 o más líneas.
+- Incluye CADA fila de la tabla de productos, incluso si tiene cantidad 0 (omite solo las líneas de totales, subtotales, transporte y resumen).
+- Los precios deben ser unitarios y SIN IVA (neto). Usa el precio de la columna "E.-Preis" o "Price" o "Precio unitario".
+- Si un producto tiene descuento (ej: "+Discount 20%"), usa el precio DESPUÉS del descuento: unit_cost = precio_original × (1 - descuento/100).
+- Los códigos pueden tener formato "11 3112", "22 1104", etc. Inclúyelos tal cual aparecen.
+- quantity debe ser un entero.
+- unit_cost debe ser un decimal con 2 decimales (usar punto como separador decimal, no coma).
+- NO incluyas líneas de transporte, embalaje (tray, etiquetas), totales o resúmenes como items.
+- El supplier_name es la empresa que EMITE la factura (ej: "TIVAMO UG"), NO el cliente.
 - Responde SOLO con el JSON, sin bloques de código markdown ni texto adicional.
 PROMPT;
 
@@ -157,7 +159,7 @@ PROMPT;
                         'content' => $content,
                     ],
                 ],
-                'max_tokens' => 4096,
+                'max_tokens' => 8192,
                 'temperature' => 0.1,
             ]);
 
