@@ -36,6 +36,7 @@ class InvoiceImporter extends Component
 
     // Step 3: Parsed items
     public array $items = [];
+    public array $invoiceSummary = [];
 
     // For matching
     public array $existingProducts = [];
@@ -80,6 +81,13 @@ class InvoiceImporter extends Component
             $this->concept = $supplierName
                 ? 'Factura ' . $supplierName . ($invoiceNum ? ' #' . $invoiceNum : '')
                 : '';
+
+            // Auto-rellenar costes extra del summary (transporte, etc.)
+            $summary = $data['summary'] ?? [];
+            $transportCost = (float) ($summary['transport_cost'] ?? 0);
+            $otherCosts = (float) ($summary['other_costs'] ?? 0);
+            $this->extraCosts = (string) round($transportCost + $otherCosts, 2);
+            $this->invoiceSummary = $summary;
 
             // Parse items
             $this->items = [];

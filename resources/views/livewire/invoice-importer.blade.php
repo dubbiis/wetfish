@@ -136,6 +136,38 @@
             </div>
         </div>
 
+        <!-- Resumen factura (extraído por IA) -->
+        @if(!empty($invoiceSummary))
+        <div class="bg-white/5 rounded-xl p-3 space-y-2">
+            <p class="text-xs font-bold uppercase tracking-widest text-white/40">Resumen de la factura (IA)</p>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                @if(($invoiceSummary['subtotal_products'] ?? 0) > 0)
+                <span class="text-white/50">Subtotal productos</span>
+                <span class="text-white font-semibold text-right">&euro; {{ number_format($invoiceSummary['subtotal_products'], 2, ',', '.') }}</span>
+                @endif
+                @if(($invoiceSummary['discount_amount'] ?? 0) > 0)
+                <span class="text-white/50">Descuento ({{ $invoiceSummary['discount_percentage'] ?? 0 }}%)</span>
+                <span class="text-rose-400 font-semibold text-right">-&euro; {{ number_format($invoiceSummary['discount_amount'], 2, ',', '.') }}</span>
+                @endif
+                @if(($invoiceSummary['transport_cost'] ?? 0) > 0)
+                <span class="text-white/50">Transporte</span>
+                <span class="text-amber-400 font-semibold text-right">&euro; {{ number_format($invoiceSummary['transport_cost'], 2, ',', '.') }}</span>
+                @endif
+                @if(!empty($invoiceSummary['transport_detail']))
+                <span class="text-white/30 col-span-2 text-[10px]">{{ $invoiceSummary['transport_detail'] }}</span>
+                @endif
+                @if(($invoiceSummary['vat_rate'] ?? 0) > 0)
+                <span class="text-white/50">IVA ({{ $invoiceSummary['vat_rate'] }}%)</span>
+                <span class="text-white font-semibold text-right">&euro; {{ number_format($invoiceSummary['vat_amount'] ?? 0, 2, ',', '.') }}</span>
+                @endif
+                @if(($invoiceSummary['total'] ?? 0) > 0)
+                <span class="text-white/50 font-bold">Total factura</span>
+                <span class="text-primary font-bold text-right">&euro; {{ number_format($invoiceSummary['total'], 2, ',', '.') }}</span>
+                @endif
+            </div>
+        </div>
+        @endif
+
         <!-- Items preview -->
         <div class="pt-2 border-t border-white/5">
             <p class="text-white/40 text-xs">{{ count($items) }} productos detectados en la factura</p>
