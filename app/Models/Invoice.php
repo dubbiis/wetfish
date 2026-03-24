@@ -8,7 +8,8 @@ class Invoice extends Model
 {
     protected $fillable = [
         'type', 'supplier_id', 'invoice_number', 'invoice_date',
-        'concept', 'total', 'extra_costs', 'file_path',
+        'concept', 'total', 'extra_costs', 'subtotal_products',
+        'transport_cost', 'discount_amount', 'vat_rate', 'vat_amount', 'file_path',
     ];
 
     protected function casts(): array
@@ -17,6 +18,11 @@ class Invoice extends Model
             'invoice_date' => 'date',
             'total' => 'decimal:2',
             'extra_costs' => 'decimal:2',
+            'subtotal_products' => 'decimal:2',
+            'transport_cost' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
+            'vat_rate' => 'decimal:2',
+            'vat_amount' => 'decimal:2',
         ];
     }
 

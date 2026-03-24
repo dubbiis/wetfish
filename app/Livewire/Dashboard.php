@@ -41,31 +41,36 @@ class Dashboard extends Component
         $maxTicket   = $allTickets->max('total') ?? 0;
         $lastTicket  = $allTickets->sortByDesc('created_at')->first();
 
-        // Costs & profit
-        $purchaseCosts = Invoice::where('type', 'purchase')
-            ->whereBetween('invoice_date', [$range['start'], $range['end']])
-            ->sum('total');
+        // Costs & profit — facturas de compra (desglosado)
+        $purchaseInvoices = Invoice::where('type', 'purchase')
+            ->whereBetween('invoice_date', [$range['start'], $range['end']]);
+        $purchaseCosts       = (clone $purchaseInvoices)->sum('total');
+        $purchaseProductCost = (clone $purchaseInvoices)->sum('subtotal_products');
+        $purchaseTransport   = (clone $purchaseInvoices)->sum('transport_cost');
+        $purchaseVat         = (clone $purchaseInvoices)->sum('vat_amount');
+
         $serviceCosts = Invoice::where('type', 'service')
             ->whereBetween('invoice_date', [$range['start'], $range['end']])
             ->sum('total');
+
         // Gastos operativos: base (sin IVA) y total (con IVA)
         $operationalBase = Expense::whereBetween('date', [$range['start'], $range['end']])->sum('amount');
         $operationalTax  = Expense::whereBetween('date', [$range['start'], $range['end']])->sum('tax_amount');
-        $operationalCosts = $operationalBase; // Para beneficio se usa la base (IVA es deducible)
-        $operationalTotal = $operationalBase + $operationalTax; // Total con IVA (lo que realmente sale de caja)
+        $operationalCosts = $operationalBase;
+        $operationalTotal = $operationalBase + $operationalTax;
 
         // IVA repercutido (cobrado en ventas)
         $ivaRepercutido = $allTickets->sum('tax_amount');
-        // IVA soportado (pagado en gastos operativos)
-        $ivaSoportado = $operationalTax;
-        // Balance fiscal: lo que hay que pagar a Hacienda
+        // IVA soportado = IVA de gastos operativos + IVA de facturas de compra
+        $ivaSoportado = $operationalTax + $purchaseVat;
+        // Balance fiscal
         $ivaBalance = $ivaRepercutido - $ivaSoportado;
 
         // Beneficio neto usando base imponible (sin IVA = coste real)
         $netProfit = $revenue - $purchaseCosts - $serviceCosts - $operationalBase;
         $marginPct = $revenue > 0 ? round(($netProfit / $revenue) * 100, 1) : 0;
 
-        // Beneficio bruto con IVA incluido (lo que realmente paga de caja)
+        // Beneficio con IVA incluido (flujo de caja real)
         $netProfitWithTax = $revenue - $purchaseCosts - $serviceCosts - $operationalTotal;
         $marginPctWithTax = $revenue > 0 ? round(($netProfitWithTax / $revenue) * 100, 1) : 0;
 
@@ -175,7 +180,7 @@ class Dashboard extends Component
 
         return view('livewire.dashboard', compact(
             'revenue', 'netProfit', 'netProfitWithTax', 'ticketCount', 'avgTicket', 'unitsSold',
-            'maxTicket', 'lastTicket', 'purchaseCosts', 'serviceCosts',
+            'maxTicket', 'lastTicket', 'purchaseCosts', 'purchaseTransport', 'purchaseVat', 'serviceCosts',
             'operationalCosts', 'operationalTotal', 'operationalTax', 'marginPct', 'marginPctWithTax',
             'ivaRepercutido', 'ivaSoportado', 'ivaBalance',
             'criticalProducts', 'inventoryValue', 'inactiveProducts',
@@ -201,9 +206,15 @@ class Dashboard extends Component
             default   => ['start' => Carbon::now()->startOfMonth(), 'end' => Carbon::now()],
         };
 
+        // Gastos operativos (luz, agua, etc.) + transporte de facturas de compra
         $totalExpenses = Expense::whereBetween('date', [$expenseRange['start'], $expenseRange['end']])->sum('amount');
+        $totalTransport = Invoice::where('type', 'purchase')
+            ->whereBetween('invoice_date', [$expenseRange['start'], $expenseRange['end']])
+            ->sum('transport_cost');
+
+        $totalCosts = $totalExpenses + $totalTransport;
         $totalUnitsInStock = Product::where('stock', '>', 0)->sum('stock');
-        $costPerUnit = $totalUnitsInStock > 0 ? round($totalExpenses / $totalUnitsInStock, 4) : 0;
+        $costPerUnit = $totalUnitsInStock > 0 ? round($totalCosts / $totalUnitsInStock, 4) : 0;
 
         $expensePeriodLabel = match ($expensePeriod) {
             '3months' => '3 meses',
@@ -211,7 +222,7 @@ class Dashboard extends Component
             default   => 'Mes actual',
         };
 
-        return compact('totalExpenses', 'totalUnitsInStock', 'costPerUnit', 'expensePeriodLabel');
+        return compact('totalExpenses', 'totalTransport', 'totalCosts', 'totalUnitsInStock', 'costPerUnit', 'expensePeriodLabel');
     }
 
     private function getDateRange(): array

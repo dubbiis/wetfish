@@ -178,7 +178,17 @@ class InvoiceImporter extends Component
         }
 
         $itemsTotal = array_sum(array_column($this->items, 'total'));
-        $total = $itemsTotal + (float) $this->extraCosts;
+        $summary = $this->invoiceSummary;
+        $transportCost = (float) ($summary['transport_cost'] ?? 0);
+        $discountAmount = (float) ($summary['discount_amount'] ?? 0);
+        $vatRate = (float) ($summary['vat_rate'] ?? 0);
+        $vatAmount = (float) ($summary['vat_amount'] ?? 0);
+        $invoiceTotal = (float) ($summary['total'] ?? 0);
+
+        // Si la IA no devolvió total, calculamos
+        if ($invoiceTotal <= 0) {
+            $invoiceTotal = $itemsTotal + (float) $this->extraCosts;
+        }
 
         $invoice = Invoice::create([
             'type' => $this->invoiceType,
@@ -186,8 +196,13 @@ class InvoiceImporter extends Component
             'invoice_number' => $this->invoiceNumber ?: null,
             'invoice_date' => $this->invoiceDate,
             'concept' => $this->concept ?: null,
-            'total' => $total,
+            'total' => $invoiceTotal,
             'extra_costs' => (float) $this->extraCosts,
+            'subtotal_products' => $itemsTotal,
+            'transport_cost' => $transportCost,
+            'discount_amount' => $discountAmount,
+            'vat_rate' => $vatRate,
+            'vat_amount' => $vatAmount,
         ]);
 
         $marginPct = (float) Setting::get('auto_margin_percentage', 30);
