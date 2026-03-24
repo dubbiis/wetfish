@@ -26,6 +26,8 @@ SESSION_DRIVER=file
 CACHE_STORE=file
 QUEUE_CONNECTION=sync
 LOG_CHANNEL=stderr
+
+OPENAI_API_KEY=${OPENAI_API_KEY:-}
 EOF
 echo "       .env OK"
 

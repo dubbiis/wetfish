@@ -43,11 +43,30 @@
             <span class="material-symbols-outlined">add</span>
             Añadir gasto
         </button>
+        <label class="size-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 hover:text-amber-300 transition-all cursor-pointer"
+            title="Escanear factura con IA">
+            <span class="material-symbols-outlined">document_scanner</span>
+            <input type="file" wire:model="expenseFile" class="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp,image/*" capture="environment">
+        </label>
         <button wire:click="openCategoryModal"
             class="size-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all"
             title="Gestionar categorías">
             <span class="material-symbols-outlined">settings</span>
         </button>
+    </div>
+
+    <!-- Loading IA -->
+    @if($processingExpense)
+    <div class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center gap-3 text-amber-400">
+        <span class="material-symbols-outlined animate-spin text-3xl">progress_activity</span>
+        <span class="text-sm font-medium">Analizando factura con IA...</span>
+        <span class="text-xs text-white/30">Los campos se rellenaran automaticamente</span>
+    </div>
+    @endif
+
+    <div wire:loading wire:target="expenseFile" class="glass-card rounded-2xl p-4 flex items-center justify-center gap-2 text-amber-400">
+        <span class="material-symbols-outlined animate-spin">progress_activity</span>
+        <span class="text-sm font-medium">Subiendo archivo...</span>
     </div>
 
     <!-- Lista de gastos -->

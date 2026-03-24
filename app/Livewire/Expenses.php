@@ -4,9 +4,11 @@ namespace App\Livewire;
 
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Services\InvoiceVisionService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -15,7 +17,7 @@ use Livewire\Attributes\Title;
 #[Title('Gastos')]
 class Expenses extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     public string $period = 'month';
 
@@ -28,6 +30,10 @@ class Expenses extends Component
     public string $taxRate      = '21';
     public string $date         = '';
     public string $notes        = '';
+
+    // IA scan
+    public $expenseFile;
+    public bool $processingExpense = false;
 
     // Modal gestionar categorías
     public bool   $showCategoryModal = false;
@@ -46,6 +52,53 @@ class Expenses extends Component
         $this->taxRate      = '21';
         $this->date         = now()->toDateString();
         $this->showAddModal = true;
+    }
+
+    public function updatedExpenseFile(): void
+    {
+        $this->validate(['expenseFile' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:10240']);
+        $this->parseExpenseWithVision();
+    }
+
+    private function parseExpenseWithVision(): void
+    {
+        $this->processingExpense = true;
+
+        try {
+            $path = $this->expenseFile->getRealPath();
+            $mimeType = $this->expenseFile->getMimeType();
+
+            $service = app(InvoiceVisionService::class);
+            $data = $service->extractExpense($path, $mimeType);
+
+            // Auto-fill form fields
+            $this->concept = $data['concept'] ?? '';
+            $this->amount  = (string) ($data['base_amount'] ?? '');
+            $this->taxRate = (string) ($data['tax_rate'] ?? '21');
+            $this->date    = $data['date'] ?? now()->toDateString();
+
+            // Try to match category by hint
+            $hint = $data['category_hint'] ?? '';
+            if ($hint) {
+                $categories = ExpenseCategory::all();
+                $match = $categories->first(fn($cat) => str_contains(
+                    mb_strtolower($cat->name),
+                    mb_strtolower($hint)
+                ));
+                if ($match) {
+                    $this->categoryId = (string) $match->id;
+                }
+            }
+
+            $this->showAddModal = true;
+            Log::info('Expense parsed with AI', ['concept' => $this->concept, 'amount' => $this->amount]);
+        } catch (\Exception $e) {
+            Log::error('Expense AI parse error', ['error' => $e->getMessage()]);
+            session()->flash('error', $e->getMessage());
+        } finally {
+            $this->processingExpense = false;
+            $this->expenseFile = null;
+        }
     }
 
     public function openEdit(int $id): void

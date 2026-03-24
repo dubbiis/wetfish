@@ -7,11 +7,12 @@ use App\Models\InvoiceItem;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\Setting;
+use App\Services\InvoiceVisionService;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 
 #[Layout('layouts.app')]
 #[Title('Importar Factura')]
@@ -20,8 +21,9 @@ class InvoiceImporter extends Component
     use WithFileUploads;
 
     // Step 1: Upload
-    public $excelFile;
+    public $invoiceFile;
     public int $step = 1;
+    public bool $processing = false;
 
     // Step 2: Invoice header
     public string $invoiceType = 'purchase';
@@ -38,47 +40,44 @@ class InvoiceImporter extends Component
     // For matching
     public array $existingProducts = [];
 
-    public function updatedExcelFile(): void
+    public function updatedInvoiceFile(): void
     {
-        $this->validate(['excelFile' => 'required|file|mimes:xlsx,xls,csv|max:5120']);
-        $this->parseExcel();
+        $this->validate(['invoiceFile' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:10240']);
+        $this->parseWithVision();
     }
 
-    private function parseExcel(): void
+    private function parseWithVision(): void
     {
+        $this->processing = true;
+
         try {
-            $path = $this->excelFile->getRealPath();
-            $spreadsheet = IOFactory::load($path);
-            $sheet = $spreadsheet->getActiveSheet();
-            $rows = $sheet->toArray(null, true, true, true);
+            $path = $this->invoiceFile->getRealPath();
+            $mimeType = $this->invoiceFile->getMimeType();
 
-            // Skip header row, parse items
-            $this->items = [];
-            $headerSkipped = false;
+            $service = app(InvoiceVisionService::class);
+            $data = $service->extractInvoice($path, $mimeType);
 
-            foreach ($rows as $row) {
-                // Skip empty rows
-                $values = array_filter($row);
-                if (empty($values)) continue;
+            // Auto-fill header from AI response
+            $this->invoiceNumber = $data['invoice_number'] ?? '';
+            $this->invoiceDate = $data['invoice_date'] ?? now()->format('Y-m-d');
 
-                // Skip header row (detect by non-numeric first data column)
-                if (!$headerSkipped) {
-                    $headerSkipped = true;
-                    // Check if this looks like a header
-                    $firstVal = trim(reset($row) ?? '');
-                    if (!is_numeric($firstVal) && !empty($firstVal)) {
-                        continue;
-                    }
+            if (!empty($data['supplier_name'])) {
+                $supplier = Supplier::where('name', 'like', '%' . $data['supplier_name'] . '%')->first();
+                if ($supplier) {
+                    $this->supplier_id = $supplier->id;
+                } else {
+                    $this->newSupplierName = $data['supplier_name'];
                 }
+            }
 
-                // Try to extract: code, name, quantity, unit_cost
-                $cols = array_values(array_map('trim', $row));
-
+            // Parse items
+            $this->items = [];
+            foreach ($data['items'] ?? [] as $aiItem) {
                 $item = [
-                    'code' => $cols[0] ?? '',
-                    'name' => $cols[1] ?? '',
-                    'quantity' => is_numeric($cols[2] ?? '') ? (int) $cols[2] : 1,
-                    'unit_cost' => is_numeric(str_replace(',', '.', $cols[3] ?? '')) ? (float) str_replace(',', '.', $cols[3]) : 0,
+                    'code' => $aiItem['code'] ?? '',
+                    'name' => $aiItem['name'] ?? '',
+                    'quantity' => (int) ($aiItem['quantity'] ?? 1),
+                    'unit_cost' => round((float) ($aiItem['unit_cost'] ?? 0), 2),
                     'total' => 0,
                     'matched_product_id' => null,
                     'is_new' => true,
@@ -86,9 +85,12 @@ class InvoiceImporter extends Component
                 $item['total'] = round($item['quantity'] * $item['unit_cost'], 2);
 
                 // Try to match existing product by code or name
-                $match = Product::where('code', $item['code'])
-                    ->orWhere('name', 'like', '%' . $item['name'] . '%')
-                    ->first();
+                if (!empty($item['code'])) {
+                    $match = Product::where('code', $item['code'])->first();
+                }
+                if (!isset($match) || !$match) {
+                    $match = Product::where('name', 'like', '%' . $item['name'] . '%')->first();
+                }
 
                 if ($match) {
                     $item['matched_product_id'] = $match->id;
@@ -98,12 +100,23 @@ class InvoiceImporter extends Component
                 if (!empty($item['name'])) {
                     $this->items[] = $item;
                 }
+
+                $match = null;
             }
 
-            $this->invoiceDate = now()->format('Y-m-d');
+            if (empty($this->items)) {
+                session()->flash('error', 'No se detectaron productos en el documento. Intenta con una imagen más clara.');
+                $this->processing = false;
+                return;
+            }
+
+            Log::info('InvoiceImporter: factura parseada con IA', ['items' => count($this->items)]);
             $this->step = 2;
         } catch (\Exception $e) {
-            session()->flash('error', 'Error al leer el archivo: ' . $e->getMessage());
+            Log::error('InvoiceImporter: error al parsear', ['error' => $e->getMessage()]);
+            session()->flash('error', $e->getMessage());
+        } finally {
+            $this->processing = false;
         }
     }
 
@@ -157,7 +170,6 @@ class InvoiceImporter extends Component
         foreach ($this->items as $item) {
             $productId = $item['matched_product_id'];
 
-            // Create new product if needed
             $adjustmentActive = Setting::get('price_adjustment_active', '0') === '1';
             $adjPct = $adjustmentActive ? (float) Setting::get('price_adjustment_percentage', 0) : 0;
 
@@ -178,7 +190,6 @@ class InvoiceImporter extends Component
                 ]);
                 $productId = $product->id;
             } elseif ($productId) {
-                // Update existing product stock and cost
                 $product = Product::find($productId);
                 if ($product) {
                     $product->stock += $item['quantity'];

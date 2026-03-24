@@ -35,23 +35,32 @@
     @if($step === 1)
     <div class="glass-card rounded-2xl p-6 space-y-6">
         <div class="text-center space-y-2">
-            <span class="material-symbols-outlined text-primary text-5xl">upload_file</span>
-            <h3 class="text-lg font-bold text-slate-100">Sube el Excel de la factura</h3>
-            <p class="text-white/40 text-sm">Formatos aceptados: .xlsx, .xls, .csv</p>
+            <span class="material-symbols-outlined text-primary text-5xl">document_scanner</span>
+            <h3 class="text-lg font-bold text-slate-100">Sube la factura del proveedor</h3>
+            <p class="text-white/40 text-sm">PDF o imagen (JPG, PNG). La IA extraera los datos automaticamente.</p>
         </div>
 
         <label class="block cursor-pointer">
             <div class="border-2 border-dashed border-white/10 rounded-2xl p-8 text-center hover:border-primary/40 transition-all">
                 <span class="material-symbols-outlined text-white/20 text-4xl">cloud_upload</span>
-                <p class="text-white/40 text-sm mt-2">Pulsa para seleccionar archivo</p>
-                <input type="file" wire:model="excelFile" class="hidden" accept=".xlsx,.xls,.csv">
+                <p class="text-white/40 text-sm mt-2">Pulsa para seleccionar o hacer foto</p>
+                <p class="text-white/20 text-xs mt-1">PDF, JPG, PNG (max 10MB)</p>
+                <input type="file" wire:model="invoiceFile" class="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp,image/*" capture="environment">
             </div>
         </label>
 
-        <div wire:loading wire:target="excelFile" class="flex items-center justify-center gap-2 text-primary">
+        <div wire:loading wire:target="invoiceFile" class="flex items-center justify-center gap-2 text-primary">
             <span class="material-symbols-outlined animate-spin">progress_activity</span>
-            <span class="text-sm font-medium">Procesando archivo...</span>
+            <span class="text-sm font-medium">Subiendo archivo...</span>
         </div>
+
+        @if($processing)
+        <div class="flex flex-col items-center justify-center gap-3 text-primary py-4">
+            <span class="material-symbols-outlined animate-spin text-3xl">progress_activity</span>
+            <span class="text-sm font-medium">Analizando factura con IA...</span>
+            <span class="text-xs text-white/30">Esto puede tardar unos segundos</span>
+        </div>
+        @endif
     </div>
     @endif
 
@@ -129,7 +138,7 @@
 
         <!-- Items preview -->
         <div class="pt-2 border-t border-white/5">
-            <p class="text-white/40 text-xs">{{ count($items) }} productos detectados en el Excel</p>
+            <p class="text-white/40 text-xs">{{ count($items) }} productos detectados en la factura</p>
         </div>
 
         <div class="flex gap-3">
