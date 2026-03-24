@@ -104,43 +104,24 @@ PROMPT;
      */
     private function buildContent(string $prompt, string $filePath, string $mimeType): array
     {
+        $base64 = base64_encode(file_get_contents($filePath));
+
         if (str_contains($mimeType, 'pdf')) {
-            return $this->buildPdfContent($prompt, $filePath);
+            // Enviar PDF directamente como file (OpenAI soporta PDFs nativamente)
+            $dataUrl = "data:application/pdf;base64,{$base64}";
+            return [
+                ['type' => 'text', 'text' => $prompt],
+                ['type' => 'file', 'file' => ['filename' => 'factura.pdf', 'file_data' => $dataUrl]],
+            ];
         }
 
         // Imagen: enviar como base64
-        $base64 = base64_encode(file_get_contents($filePath));
         $dataUrl = "data:{$mimeType};base64,{$base64}";
 
         return [
             ['type' => 'text', 'text' => $prompt],
             ['type' => 'image_url', 'image_url' => ['url' => $dataUrl, 'detail' => 'high']],
         ];
-    }
-
-    /**
-     * Para PDFs: extrae texto y lo envía como prompt de texto.
-     */
-    private function buildPdfContent(string $prompt, string $filePath): array
-    {
-        try {
-            $parser = new PdfParser();
-            $pdf = $parser->parseFile($filePath);
-            $text = $pdf->getText();
-
-            if (strlen(trim($text)) < 50) {
-                throw new \RuntimeException('PDF sin texto legible');
-            }
-
-            return [
-                ['type' => 'text', 'text' => $prompt . "\n\n--- CONTENIDO DEL DOCUMENTO ---\n\n" . $text],
-            ];
-        } catch (\Exception $e) {
-            Log::warning('InvoiceVision: PDF sin texto extraíble, intentando como imagen', ['error' => $e->getMessage()]);
-            throw new \RuntimeException(
-                'No se pudo leer el texto del PDF. Por favor, haz una foto o captura de pantalla de la factura y súbela como imagen (JPG/PNG).'
-            );
-        }
     }
 
     /**
