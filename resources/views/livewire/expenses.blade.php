@@ -401,11 +401,11 @@
                 @if(!$editingRecurringId)
                 <label class="flex items-center gap-3 cursor-pointer pb-1">
                     <div class="relative">
-                        <input type="checkbox" wire:model="recurringIncludeCurrentMonth" class="sr-only">
+                        <input type="checkbox" wire:model.live="recurringIncludeCurrentMonth" class="sr-only" id="include_current_toggle">
                         <div class="w-11 h-6 rounded-full transition-colors {{ $recurringIncludeCurrentMonth ? 'bg-primary' : 'bg-white/10' }}"></div>
                         <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform {{ $recurringIncludeCurrentMonth ? 'translate-x-5' : '' }}"></div>
                     </div>
-                    <span class="text-sm text-slate-300">Incluir mes actual</span>
+                    <span class="text-sm text-slate-300">{{ $recurringIncludeCurrentMonth ? 'Incluye mes actual' : 'Empieza el mes que viene' }}</span>
                 </label>
                 @endif
             </div>

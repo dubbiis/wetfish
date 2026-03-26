@@ -67,8 +67,27 @@ class ProductEdit extends Component
     {
         if ($this->auto_margin && is_numeric($this->cost_price) && $this->cost_price > 0) {
             $marginPct = Setting::get('auto_margin_percentage', 30);
-            $this->sale_price = number_format($this->cost_price * (1 + $marginPct / 100), 2, '.', '');
+            // Usar coste real (compra + gastos operativos) para el margen
+            $costPerUnit = $this->getCostPerUnit();
+            $realCost = (float) $this->cost_price + $costPerUnit;
+            $this->sale_price = number_format($realCost * (1 + $marginPct / 100), 2, '.', '');
         }
+    }
+
+    private function getCostPerUnit(): float
+    {
+        $expensePeriod = Setting::get('expense_calculation_period', 'month');
+        $expenseRange = match ($expensePeriod) {
+            '3months' => ['start' => Carbon::now()->subMonths(3), 'end' => Carbon::now()],
+            '6months' => ['start' => Carbon::now()->subMonths(6), 'end' => Carbon::now()],
+            default   => ['start' => Carbon::now()->startOfMonth(), 'end' => Carbon::now()],
+        };
+        $totalExpenses = (float) Expense::whereBetween('date', [$expenseRange['start'], $expenseRange['end']])->sum('amount');
+        $totalTransport = (float) Invoice::where('type', 'purchase')
+            ->whereBetween('invoice_date', [$expenseRange['start'], $expenseRange['end']])
+            ->sum('transport_cost');
+        $totalUnits = (int) Product::where('stock', '>', 0)->sum('stock');
+        return $totalUnits > 0 ? round(($totalExpenses + $totalTransport) / $totalUnits, 2) : 0;
     }
 
     public function save(): void

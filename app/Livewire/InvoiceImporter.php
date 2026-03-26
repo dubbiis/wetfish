@@ -261,6 +261,18 @@ class InvoiceImporter extends Component
 
         $marginPct = (float) Setting::get('auto_margin_percentage', 30);
 
+        // Calcular coste operativo por unidad para margen real
+        $expensePeriod = Setting::get('expense_calculation_period', 'month');
+        $expenseRange = match ($expensePeriod) {
+            '3months' => ['start' => \Carbon\Carbon::now()->subMonths(3), 'end' => \Carbon\Carbon::now()],
+            '6months' => ['start' => \Carbon\Carbon::now()->subMonths(6), 'end' => \Carbon\Carbon::now()],
+            default   => ['start' => \Carbon\Carbon::now()->startOfMonth(), 'end' => \Carbon\Carbon::now()],
+        };
+        $totalExp = (float) \App\Models\Expense::whereBetween('date', [$expenseRange['start'], $expenseRange['end']])->sum('amount');
+        $totalTrp = (float) Invoice::where('type', 'purchase')->whereBetween('invoice_date', [$expenseRange['start'], $expenseRange['end']])->sum('transport_cost');
+        $totalUnits = (int) Product::where('stock', '>', 0)->sum('stock');
+        $costPerUnit = $totalUnits > 0 ? round(($totalExp + $totalTrp) / $totalUnits, 2) : 0;
+
         foreach ($this->items as $item) {
             $productId = $item['matched_product_id'];
 
@@ -268,7 +280,8 @@ class InvoiceImporter extends Component
             $adjPct = $adjustmentActive ? (float) Setting::get('price_adjustment_percentage', 0) : 0;
 
             if ($item['is_new'] && !$productId) {
-                $baseSalePrice = round($item['unit_cost'] * (1 + $marginPct / 100), 2);
+                $realCost = $item['unit_cost'] + $costPerUnit;
+                $baseSalePrice = round($realCost * (1 + $marginPct / 100), 2);
                 $finalSalePrice = $adjustmentActive
                     ? round($baseSalePrice * (1 + $adjPct / 100), 2)
                     : $baseSalePrice;
@@ -298,7 +311,8 @@ class InvoiceImporter extends Component
                     if ($newCost > (float) $product->cost_price) {
                         $product->cost_price = $newCost;
                         if ($product->auto_margin) {
-                            $baseSalePrice = round($newCost * (1 + $marginPct / 100), 2);
+                            $realCost = $newCost + $costPerUnit;
+                            $baseSalePrice = round($realCost * (1 + $marginPct / 100), 2);
                             $product->base_sale_price = $baseSalePrice;
                             $product->sale_price = $adjustmentActive
                                 ? round($baseSalePrice * (1 + $adjPct / 100), 2)
