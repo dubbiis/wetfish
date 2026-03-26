@@ -57,27 +57,6 @@ php artisan migrate --force && echo "       OK" || echo "       WARNING: issues"
 echo "[6/7] Running seeders..."
 php artisan db:seed --force && echo "       OK" || echo "       WARNING: issues"
 
-# === TEMPORAL: Limpiar datos para entrega al cliente ===
-echo "[TEMP] Limpiando datos de prueba..."
-php artisan tinker --execute="
-\App\Models\TicketItem::query()->delete();
-\App\Models\Ticket::query()->delete();
-\App\Models\InvoiceItem::query()->delete();
-\App\Models\Invoice::query()->delete();
-\App\Models\Expense::query()->delete();
-\App\Models\RecurringExpense::query()->delete();
-\App\Models\Product::query()->delete();
-\App\Models\Supplier::query()->delete();
-\App\Models\Task::query()->delete();
-\App\Models\AiUsageLog::query()->delete();
-\App\Models\Setting::where('key', 'recurring_expenses_last_check')->delete();
-\App\Models\Setting::where('key', 'price_adjustment_active')->update(['value' => '0']);
-\App\Models\Setting::where('key', 'price_adjustment_percentage')->update(['value' => '0']);
-echo 'OK - Datos limpiados';
-" 2>&1
-echo "       OK"
-# === FIN TEMPORAL ===
-
 # Verify assets
 echo "[7/7] Verifying build..."
 echo "       public_html contents:"
