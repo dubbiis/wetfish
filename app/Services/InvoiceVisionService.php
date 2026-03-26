@@ -43,9 +43,14 @@ Devuelve EXCLUSIVAMENTE un JSON válido con esta estructura exacta, sin texto ad
 Reglas CRÍTICAS:
 - Extrae ABSOLUTAMENTE TODAS las líneas de productos. NO omitas ninguna, aunque haya 30, 50 o más líneas.
 - Incluye CADA fila de la tabla de productos, incluso si tiene cantidad 0.
-- Los precios deben ser unitarios y SIN IVA (neto). Usa el precio de la columna "E.-Preis" o "Price" o "Precio unitario".
-- Si un producto tiene descuento (ej: "+Discount 20%"), usa el precio DESPUÉS del descuento: unit_cost = precio_original × (1 - descuento/100).
-- Los códigos pueden tener formato "11 3112", "22 1104", etc. Inclúyelos tal cual aparecen.
+- unit_cost DEBE ser el precio UNITARIO POR UNIDAD, NO el total de la línea. Es el número MÁS PEQUEÑO entre "Price" y "Total price".
+  VERIFICACIÓN OBLIGATORIA: unit_cost × quantity debe ser aproximadamente igual al total de la línea. Si no cuadra, has cogido el precio equivocado.
+  Ejemplo: "Cheirodon axelrodi, Count: 150, Price EUR: 0,31, Total price EUR: 46,50" → unit_cost = 0.31 (NO 46.50).
+  Ejemplo: "Anubias barteri, 12 uds, E.-Preis: 3,13, Gesamt: 37,56" → unit_cost = 3.13 (NO 37.56).
+- Si hay columnas "Price" Y "Total price", usa SIEMPRE "Price" (la unitaria, el número más pequeño).
+- Si un producto tiene descuento (ej: "+Discount 20%", "% Dto."), usa el precio DESPUÉS del descuento. Si la columna "Importe" ya tiene el descuento aplicado, calcula: unit_cost = Importe / Cantidad.
+- Los precios deben ser SIN IVA (neto) salvo que la factura no tenga IVA (exportación intra-UE).
+- Los códigos pueden tener formato "11 3112", "22 1104", "PPF112", "15757", etc. Inclúyelos tal cual aparecen.
 - quantity debe ser un entero.
 - unit_cost debe ser un decimal con 2 decimales (usar punto como separador decimal, no coma).
 - NO incluyas como items de producto las siguientes líneas. En su lugar, SUMA su coste a "other_costs" en el summary:

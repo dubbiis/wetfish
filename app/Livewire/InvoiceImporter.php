@@ -94,11 +94,29 @@ class InvoiceImporter extends Component
             $this->items = [];
             $autoExtraCosts = 0;
             foreach ($data['items'] ?? [] as $aiItem) {
+                $qty = (int) ($aiItem['quantity'] ?? 1);
+                $unitCost = round((float) ($aiItem['unit_cost'] ?? 0), 2);
+
+                // Validación: si unit_cost × qty es absurdamente alto respecto al total de la factura,
+                // probablemente la IA confundió precio unitario con total de línea → corregir
+                if ($qty > 1 && $unitCost > 0) {
+                    $lineTotal = $unitCost * $qty;
+                    // Si el "unit_cost" parece ser el total (unit_cost > lineTotal esperado razonable),
+                    // dividir entre qty para obtener el precio real
+                    $possibleRealUnit = round($unitCost / $qty, 2);
+                    if ($possibleRealUnit * $qty <= $unitCost && $unitCost > 10 && $possibleRealUnit < $unitCost * 0.5) {
+                        Log::info('InvoiceImporter: corrigiendo unit_cost (era total)', [
+                            'name' => $aiItem['name'] ?? '', 'original' => $unitCost, 'corrected' => $possibleRealUnit
+                        ]);
+                        $unitCost = $possibleRealUnit;
+                    }
+                }
+
                 $item = [
                     'code' => $aiItem['code'] ?? '',
                     'name' => $aiItem['name'] ?? '',
-                    'quantity' => (int) ($aiItem['quantity'] ?? 1),
-                    'unit_cost' => round((float) ($aiItem['unit_cost'] ?? 0), 2),
+                    'quantity' => $qty,
+                    'unit_cost' => $unitCost,
                     'total' => 0,
                     'matched_product_id' => null,
                     'is_new' => true,
