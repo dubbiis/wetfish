@@ -133,6 +133,40 @@ class Settings extends Component
         session()->flash('margin_saved', true);
     }
 
+    public function recalculateAllPrices(): void
+    {
+        $marginPct = (float) Setting::get('auto_margin_percentage', 30);
+        $adjustmentActive = Setting::get('price_adjustment_active', '0') === '1';
+        $adjPct = $adjustmentActive ? (float) Setting::get('price_adjustment_percentage', 0) : 0;
+
+        // Calcular coste operativo
+        $expensePeriod = Setting::get('expense_calculation_period', 'month');
+        $expenseRange = match ($expensePeriod) {
+            '3months' => ['start' => \Carbon\Carbon::now()->subMonths(3), 'end' => \Carbon\Carbon::now()],
+            '6months' => ['start' => \Carbon\Carbon::now()->subMonths(6), 'end' => \Carbon\Carbon::now()],
+            default   => ['start' => \Carbon\Carbon::now()->startOfMonth(), 'end' => \Carbon\Carbon::now()],
+        };
+        $totalExp = (float) \App\Models\Expense::whereBetween('date', [$expenseRange['start'], $expenseRange['end']])->sum('amount');
+        $totalTrp = (float) \App\Models\Invoice::where('type', 'purchase')->whereBetween('invoice_date', [$expenseRange['start'], $expenseRange['end']])->sum('transport_cost');
+        $totalUnits = (int) \App\Models\Product::where('stock', '>', 0)->sum('stock');
+        $costPerUnit = $totalUnits > 0 ? round(($totalExp + $totalTrp) / $totalUnits, 2) : 0;
+
+        $count = 0;
+        \App\Models\Product::where('auto_margin', true)->each(function ($product) use ($marginPct, $costPerUnit, $adjustmentActive, $adjPct, &$count) {
+            $realCost = (float) $product->cost_price + $costPerUnit;
+            $baseSalePrice = round($realCost * (1 + $marginPct / 100), 2);
+            $product->base_sale_price = $baseSalePrice;
+            $product->sale_price = $adjustmentActive
+                ? round($baseSalePrice * (1 + $adjPct / 100), 2)
+                : $baseSalePrice;
+            $product->save();
+            $count++;
+        });
+
+        \Illuminate\Support\Facades\Log::info("Recalculados {$count} productos con coste real", ['costPerUnit' => $costPerUnit]);
+        session()->flash('prices_recalculated', $count);
+    }
+
     public function applyPriceAdjustment(): void
     {
         $this->validate([

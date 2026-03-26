@@ -114,6 +114,16 @@
         @if(session('margin_saved'))
         <p class="text-emerald-400 text-sm text-center">Configuración de margen guardada</p>
         @endif
+
+        <button wire:click="recalculateAllPrices"
+            wire:confirm="¿Recalcular precios de TODOS los productos con margen automático usando el coste real actual?"
+            class="w-full h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold transition-all active:scale-[0.98]">
+            <span class="material-symbols-outlined text-base align-middle mr-1">sync</span>
+            Recalcular todos los precios
+        </button>
+        @if(session('prices_recalculated'))
+        <p class="text-emerald-400 text-sm text-center">{{ session('prices_recalculated') }} productos recalculados con coste real</p>
+        @endif
     </div>
 
     <!-- Ajuste de precios -->

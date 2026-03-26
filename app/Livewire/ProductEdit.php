@@ -50,6 +50,11 @@ class ProductEdit extends Component
             $this->min_stock = $this->product->min_stock;
             $this->auto_margin = $this->product->auto_margin;
             $this->existingPhoto = $this->product->photo;
+
+            // Recalcular precio si tiene margen automático
+            if ($this->auto_margin) {
+                $this->calculateAutoMargin();
+            }
         }
     }
 
