@@ -26,6 +26,11 @@ Route::middleware(['auth'])->group(function () {
             $pdf->setPaper('a4', 'portrait');
             return $pdf->download('WetFish-Informe-Coste-Real.pdf');
         })->name('reports.coste-real');
+        Route::get('/reports/manual-usuario', function () {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reports.manual-usuario');
+            $pdf->setPaper('a4', 'portrait');
+            return $pdf->download('WetFish-Manual-Usuario.pdf');
+        })->name('reports.manual-usuario');
     });
 
     // Shared routes (admin + employee)
