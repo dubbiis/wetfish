@@ -210,8 +210,10 @@
                 <div class="grid grid-cols-3 gap-3" x-data="{
                     base: $wire.entangle('amount'),
                     rate: $wire.entangle('taxRate'),
+                    aiTotal: {{ $aiTaxAmount !== null ? json_encode(round((float)$amount + $aiTaxAmount, 2)) : 'null' }},
                     get taxAmt() { return (parseFloat(this.base) || 0) * (parseFloat(this.rate) || 0) / 100; },
-                    get total() { return (parseFloat(this.base) || 0) + this.taxAmt; }
+                    get total() { return this.aiTotal ?? ((parseFloat(this.base) || 0) + this.taxAmt); },
+                    init() { this.$watch('base', () => this.aiTotal = null); this.$watch('rate', () => this.aiTotal = null); }
                 }">
                     <div>
                         <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Base (&euro;)</label>
