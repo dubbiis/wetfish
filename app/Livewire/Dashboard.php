@@ -8,6 +8,7 @@ use App\Models\RecurringExpense;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Models\StockLoss;
 use App\Models\Ticket;
 use App\Models\TicketItem;
 use Illuminate\Support\Carbon;
@@ -96,6 +97,10 @@ class Dashboard extends Component
         // Stock & inventory
         $criticalProducts  = Product::whereColumn('stock', '<=', 'min_stock')->count();
         $inventoryValue    = Product::selectRaw('SUM(stock * cost_price) as total')->value('total') ?? 0;
+
+        // Merma en el período
+        $lossUnits = (int) StockLoss::whereBetween('date', [$range['start'], $range['end']])->sum('quantity');
+        $lossCost  = (float) StockLoss::whereBetween('date', [$range['start'], $range['end']])->sum('total_cost');
         $activeProductIds  = $ticketItems->pluck('product_id')->unique()->filter();
         $inactiveProducts  = Product::where('stock', '>', 0)
             ->whereNotIn('id', $activeProductIds)
@@ -209,7 +214,7 @@ class Dashboard extends Component
             'maxTicket', 'lastTicket', 'purchaseCosts', 'purchaseTransport', 'purchaseVat', 'serviceCosts',
             'operationalCosts', 'operationalTotal', 'operationalTax', 'marginPct', 'marginPctWithTax',
             'ivaRepercutido', 'ivaSoportado', 'ivaBalance',
-            'criticalProducts', 'inventoryValue', 'inactiveProducts',
+            'criticalProducts', 'inventoryValue', 'inactiveProducts', 'lossUnits', 'lossCost',
             'topProductsByQty', 'topProductsByRevenue', 'salesByCategory',
             'expensesByCategory', 'peakHour', 'bestDay',
             'realMarginPct', 'targetMarginPct', 'costPerUnit', 'totalUnitsInStock',

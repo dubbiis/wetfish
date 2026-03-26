@@ -328,18 +328,29 @@
     <!-- ── Sección 5: Inventario ── -->
     <a href="{{ route('stock') }}" class="glass-card rounded-2xl p-4 block">
         <p class="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">Inventario</p>
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-2 gap-3">
             <div class="space-y-1">
                 <p class="text-xs text-slate-400">Valor total</p>
-                <p class="text-lg font-bold text-white">€ {{ number_format($inventoryValue, 0, ',', '.') }}</p>
+                <p class="text-lg font-bold text-white">&euro; {{ number_format($inventoryValue, 0, ',', '.') }}</p>
             </div>
             <div class="space-y-1">
-                <p class="text-xs text-slate-400">Stock crítico</p>
+                <p class="text-xs text-slate-400">Stock cr&iacute;tico</p>
                 <p class="text-lg font-bold {{ $criticalProducts > 0 ? 'text-rose-400' : 'text-emerald-400' }}">{{ $criticalProducts }}</p>
             </div>
             <div class="space-y-1">
                 <p class="text-xs text-slate-400">Sin movimiento</p>
                 <p class="text-lg font-bold text-slate-300">{{ $inactiveProducts }}</p>
+            </div>
+            <div class="space-y-1">
+                <p class="text-xs text-slate-400 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs">heart_broken</span> Merma
+                </p>
+                <p class="text-lg font-bold {{ $lossUnits > 0 ? 'text-rose-400' : 'text-emerald-400' }}">
+                    {{ $lossUnits }} uds
+                </p>
+                @if($lossCost > 0)
+                <p class="text-[10px] text-rose-400/60">&euro; {{ number_format($lossCost, 2, ',', '.') }} perdidos</p>
+                @endif
             </div>
         </div>
         @if($criticalProducts > 0)

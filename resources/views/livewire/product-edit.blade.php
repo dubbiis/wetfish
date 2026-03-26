@@ -133,7 +133,16 @@
 
         <!-- Stock -->
         <div class="glass-card rounded-2xl p-4 space-y-4">
-            <h3 class="text-xs font-bold uppercase tracking-widest text-white/40">Stock</h3>
+            <div class="flex items-center justify-between">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-white/40">Stock</h3>
+                @if(!$isNew)
+                <button type="button" wire:click="openLossModal"
+                    class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-medium hover:bg-rose-500/20 transition-all">
+                    <span class="material-symbols-outlined text-sm">heart_broken</span>
+                    Registrar merma
+                </button>
+                @endif
+            </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
                     <label class="text-xs text-white/50">Cantidad actual</label>
@@ -148,6 +157,26 @@
                         min="0">
                 </div>
             </div>
+
+            <!-- Merma acumulada -->
+            @if($totalLosses > 0)
+            <div class="bg-rose-500/5 border border-rose-500/10 rounded-xl p-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-rose-400 font-medium">Merma total: {{ $totalLosses }} uds</span>
+                    <span class="text-xs text-rose-400 font-bold">&euro; {{ number_format($totalLossCost, 2, ',', '.') }} perdidos</span>
+                </div>
+                @foreach($recentLosses as $loss)
+                <div class="flex items-center justify-between mt-2 text-[10px] text-white/30">
+                    <span>{{ $loss->date->format('d/m/Y') }} · {{ \App\Models\StockLoss::REASONS[$loss->reason] ?? $loss->reason }} · {{ $loss->quantity }} uds</span>
+                    <span>&euro; {{ number_format($loss->total_cost, 2, ',', '.') }}</span>
+                </div>
+                @endforeach
+            </div>
+            @endif
+
+            @if(session('loss_registered'))
+            <p class="text-emerald-400 text-sm text-center">{{ session('loss_registered') }}</p>
+            @endif
         </div>
 
         <!-- Actions -->
@@ -172,4 +201,59 @@
         </button>
         @endif
     </form>
+
+    <!-- Modal merma -->
+    @if($showLossModal)
+    <div class="fixed inset-0 z-[60] flex items-end justify-center pb-24">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeLossModal"></div>
+        <div class="relative w-full max-w-lg bg-[#171121] border border-white/10 rounded-t-3xl flex flex-col max-h-[85vh]">
+            <div class="flex items-center justify-between p-5 pb-4 shrink-0">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-rose-400">heart_broken</span>
+                    Registrar merma
+                </h3>
+                <button wire:click="closeLossModal" class="text-white/40 hover:text-white">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 px-5 space-y-4">
+                <p class="text-sm text-white/50">{{ $name }} — Stock actual: <strong class="text-white">{{ $stock }}</strong></p>
+
+                <div>
+                    <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Cantidad</label>
+                    <input wire:model="lossQuantity" type="number" min="1" max="{{ $stock }}"
+                        class="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-center text-xl font-bold focus:ring-1 focus:ring-primary/50">
+                    @error('lossQuantity') <p class="text-rose-400 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-2 block">Motivo</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        @foreach(\App\Models\StockLoss::REASONS as $val => $lbl)
+                        <button type="button" wire:click="$set('lossReason', '{{ $val }}')"
+                            class="h-10 rounded-lg font-medium text-xs transition-all
+                            {{ $lossReason === $val ? 'bg-rose-500/20 border-rose-500/30 text-rose-400 border' : 'bg-white/5 border border-white/10 text-slate-300' }}">
+                            {{ $lbl }}
+                        </button>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="pb-2">
+                    <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Notas (opcional)</label>
+                    <input wire:model="lossNotes" type="text" placeholder="Ej: Encontrados muertos al abrir"
+                        class="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder:text-white/30 focus:ring-1 focus:ring-primary/50">
+                </div>
+            </div>
+
+            <div class="p-5 pt-4 shrink-0">
+                <button wire:click="registerLoss"
+                    class="w-full h-12 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-400 font-semibold transition-all active:scale-95">
+                    Registrar merma
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

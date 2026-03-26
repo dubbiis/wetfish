@@ -31,6 +31,11 @@ class Product extends Model
         return $this->hasMany(TicketItem::class);
     }
 
+    public function stockLosses()
+    {
+        return $this->hasMany(StockLoss::class);
+    }
+
     public function getStockStatusAttribute(): string
     {
         if ($this->stock <= 0) return 'critical';

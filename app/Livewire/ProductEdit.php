@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Setting;
+use App\Models\StockLoss;
 use Illuminate\Support\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -32,6 +33,12 @@ class ProductEdit extends Component
     public bool $auto_margin = false;
     public $photo;
     public ?string $existingPhoto = null;
+
+    // Merma
+    public bool   $showLossModal = false;
+    public string $lossQuantity  = '1';
+    public string $lossReason    = 'muerto';
+    public string $lossNotes     = '';
 
     public function mount(string $productId = 'new'): void
     {
@@ -145,6 +152,51 @@ class ProductEdit extends Component
         $this->redirect(route('stock'), navigate: true);
     }
 
+    public function openLossModal(): void
+    {
+        $this->lossQuantity = '1';
+        $this->lossReason = 'muerto';
+        $this->lossNotes = '';
+        $this->showLossModal = true;
+    }
+
+    public function closeLossModal(): void
+    {
+        $this->showLossModal = false;
+        $this->resetValidation();
+    }
+
+    public function registerLoss(): void
+    {
+        $this->validate([
+            'lossQuantity' => 'required|integer|min:1',
+            'lossReason'   => 'required|in:muerto,enfermo,devuelto,danado,otro',
+        ]);
+
+        $qty = (int) $this->lossQuantity;
+        $unitCost = (float) $this->product->cost_price;
+
+        StockLoss::create([
+            'product_id' => $this->product->id,
+            'quantity'   => $qty,
+            'reason'     => $this->lossReason,
+            'notes'      => $this->lossNotes ?: null,
+            'unit_cost'  => $unitCost,
+            'total_cost' => round($unitCost * $qty, 2),
+            'date'       => now()->toDateString(),
+        ]);
+
+        $this->product->decrement('stock', $qty);
+        $this->stock = $this->product->fresh()->stock;
+
+        \Illuminate\Support\Facades\Log::info('StockLoss registrado', [
+            'product' => $this->product->name, 'qty' => $qty, 'reason' => $this->lossReason,
+        ]);
+
+        $this->closeLossModal();
+        session()->flash('loss_registered', "Merma de {$qty} uds registrada");
+    }
+
     public function delete(): void
     {
         if ($this->product) {
@@ -173,10 +225,18 @@ class ProductEdit extends Component
 
         $realCost = round((float) $this->cost_price + $costPerUnit, 2);
 
+        // Mermas del producto
+        $recentLosses = $this->product ? StockLoss::where('product_id', $this->product->id)->orderByDesc('date')->limit(5)->get() : collect();
+        $totalLosses = $this->product ? StockLoss::where('product_id', $this->product->id)->sum('quantity') : 0;
+        $totalLossCost = $this->product ? (float) StockLoss::where('product_id', $this->product->id)->sum('total_cost') : 0;
+
         return view('livewire.product-edit', [
             'categories' => Category::all(),
             'costPerUnit' => $costPerUnit,
             'realCost' => $realCost,
+            'recentLosses' => $recentLosses,
+            'totalLosses' => $totalLosses,
+            'totalLossCost' => $totalLossCost,
         ]);
     }
 }
