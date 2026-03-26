@@ -78,10 +78,10 @@
 
             <!-- Auto margin toggle -->
             <label class="flex items-center gap-3 cursor-pointer">
-                <div class="relative" x-data="{ checked: @entangle('auto_margin') }">
-                    <input type="checkbox" wire:model.live="auto_margin" class="sr-only" x-model="checked">
-                    <div class="w-11 h-6 rounded-full transition-colors" :class="checked ? 'bg-primary' : 'bg-white/10'"></div>
-                    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="checked ? 'translate-x-5' : ''"></div>
+                <div class="relative">
+                    <input type="checkbox" wire:model.live="auto_margin" class="sr-only" id="auto_margin_toggle">
+                    <div class="w-11 h-6 rounded-full transition-colors {{ $auto_margin ? 'bg-primary' : 'bg-white/10' }}"></div>
+                    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform {{ $auto_margin ? 'translate-x-5' : '' }}"></div>
                 </div>
                 <span class="text-sm text-slate-300">Margen automatico ({{ \App\Models\Setting::get('auto_margin_percentage', 30) }}%)</span>
             </label>
