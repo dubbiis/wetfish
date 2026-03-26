@@ -41,6 +41,8 @@ class InvoiceImporter extends Component
 
     // For matching
     public array $existingProducts = [];
+    public ?int $linkingIndex = null;    // Índice del item que se está vinculando
+    public string $linkSearch = '';      // Búsqueda de producto para vincular
 
     public function updatedInvoiceFile(): void
     {
@@ -212,6 +214,36 @@ class InvoiceImporter extends Component
         $this->items = array_values($this->items);
 
         Log::info('Item eliminado y sumado a costes extra', ['name' => $item['name'], 'total' => $item['total']]);
+    }
+
+    public function openLinkSearch(int $index): void
+    {
+        $this->linkingIndex = $index;
+        $this->linkSearch = '';
+    }
+
+    public function closeLinkSearch(): void
+    {
+        $this->linkingIndex = null;
+        $this->linkSearch = '';
+    }
+
+    public function linkToProduct(int $index, int $productId): void
+    {
+        $product = Product::find($productId);
+        if ($product) {
+            $this->items[$index]['matched_product_id'] = $product->id;
+            $this->items[$index]['is_new'] = false;
+            Log::info('Item vinculado manualmente', ['item' => $this->items[$index]['name'], 'product' => $product->name]);
+        }
+        $this->linkingIndex = null;
+        $this->linkSearch = '';
+    }
+
+    public function unlinkProduct(int $index): void
+    {
+        $this->items[$index]['matched_product_id'] = null;
+        $this->items[$index]['is_new'] = true;
     }
 
     public function toggleNewProduct(int $index): void

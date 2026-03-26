@@ -215,22 +215,62 @@
                 </div>
 
                 <!-- Match status -->
-                <div class="flex items-center justify-between">
-                    @if($item['matched_product_id'] && !$item['is_new'])
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-medium">
-                        <span class="material-symbols-outlined text-xs">link</span>
-                        Producto existente — actualizar stock
-                    </span>
-                    @else
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-500/10 text-blue-400 text-xs font-medium">
-                        <span class="material-symbols-outlined text-xs">add_circle</span>
-                        Nuevo — {{ ucfirst(str_replace('-', ' ', $item['category'] ?? 'sin categoría')) }}
-                    </span>
-                    @endif
-                    @if($item['matched_product_id'])
-                    <button wire:click="toggleNewProduct({{ $index }})" class="text-xs text-white/40 hover:text-white/60">
-                        {{ $item['is_new'] ? 'Vincular existente' : 'Crear nuevo' }}
-                    </button>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        @if($item['matched_product_id'] && !$item['is_new'])
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-medium">
+                            <span class="material-symbols-outlined text-xs">link</span>
+                            Vinculado — actualizar stock
+                        </span>
+                        <button wire:click="unlinkProduct({{ $index }})" class="text-xs text-white/40 hover:text-rose-400">
+                            Desvincular
+                        </button>
+                        @else
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-500/10 text-blue-400 text-xs font-medium">
+                            <span class="material-symbols-outlined text-xs">add_circle</span>
+                            Nuevo — {{ ucfirst(str_replace('-', ' ', $item['category'] ?? 'sin categoría')) }}
+                        </span>
+                        <button wire:click="openLinkSearch({{ $index }})" class="text-xs text-primary hover:text-primary/80 font-medium">
+                            Vincular existente
+                        </button>
+                        @endif
+                    </div>
+
+                    <!-- Buscador de productos para vincular -->
+                    @if($linkingIndex === $index)
+                    <div class="bg-white/5 rounded-xl p-3 space-y-2 border border-primary/20">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-sm">search</span>
+                            <input wire:model.live.debounce.300ms="linkSearch" type="text" placeholder="Buscar producto..."
+                                class="flex-1 h-8 px-3 bg-white/5 border border-white/10 rounded-lg text-sm text-slate-100 placeholder:text-white/30 focus:ring-1 focus:ring-primary/50">
+                            <button wire:click="closeLinkSearch" class="text-white/40 hover:text-white">
+                                <span class="material-symbols-outlined text-sm">close</span>
+                            </button>
+                        </div>
+                        @if(strlen($linkSearch) >= 2)
+                        <div class="max-h-32 overflow-y-auto space-y-1">
+                            @php
+                                $searchResults = \App\Models\Product::where('name', 'like', '%' . $linkSearch . '%')
+                                    ->orWhere('code', 'like', '%' . $linkSearch . '%')
+                                    ->limit(8)->get();
+                            @endphp
+                            @forelse($searchResults as $result)
+                            <button wire:click="linkToProduct({{ $index }}, {{ $result->id }})"
+                                class="w-full text-left px-3 py-2 rounded-lg bg-white/5 hover:bg-primary/10 transition-all flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-slate-200">{{ $result->name }}</p>
+                                    <p class="text-[10px] text-white/30">{{ $result->code ?? '—' }} · Stock: {{ $result->stock }}</p>
+                                </div>
+                                <span class="material-symbols-outlined text-primary text-sm">link</span>
+                            </button>
+                            @empty
+                            <p class="text-xs text-white/30 text-center py-2">No se encontraron productos</p>
+                            @endforelse
+                        </div>
+                        @else
+                        <p class="text-xs text-white/30 text-center">Escribe al menos 2 letras</p>
+                        @endif
+                    </div>
                     @endif
                 </div>
             </div>
