@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\RecurringExpense;
 use App\Services\InvoiceVisionService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -39,6 +40,15 @@ class Expenses extends Component
     public bool   $showCategoryModal = false;
     public string $newCategoryName   = '';
     public string $newCategoryIcon   = 'receipt';
+
+    // Modal gastos fijos recurrentes
+    public bool   $showRecurringModal   = false;
+    public ?int   $editingRecurringId   = null;
+    public string $recurringCategoryId  = '';
+    public string $recurringConcept     = '';
+    public string $recurringAmount      = '';
+    public string $recurringTaxRate     = '0';
+    public string $recurringFrequency   = 'monthly';
 
     public function setPeriod(string $period): void
     {
@@ -203,8 +213,81 @@ class Expenses extends Component
         Log::info('ExpenseCategory deleted', ['id' => $id]);
     }
 
+    // --- Gastos fijos recurrentes ---
+
+    public function openAddRecurring(): void
+    {
+        $this->reset('editingRecurringId', 'recurringCategoryId', 'recurringConcept', 'recurringAmount', 'recurringTaxRate', 'recurringFrequency');
+        $this->recurringTaxRate    = '0';
+        $this->recurringFrequency  = 'monthly';
+        $this->showRecurringModal  = true;
+    }
+
+    public function openEditRecurring(int $id): void
+    {
+        $rec = RecurringExpense::findOrFail($id);
+        $this->editingRecurringId  = $id;
+        $this->recurringCategoryId = (string) $rec->expense_category_id;
+        $this->recurringConcept    = $rec->concept;
+        $this->recurringAmount     = (string) $rec->amount;
+        $this->recurringTaxRate    = (string) $rec->tax_rate;
+        $this->recurringFrequency  = $rec->frequency;
+        $this->showRecurringModal  = true;
+    }
+
+    public function closeRecurringModal(): void
+    {
+        $this->showRecurringModal = false;
+        $this->resetValidation();
+    }
+
+    public function saveRecurring(): void
+    {
+        $data = $this->validate([
+            'recurringCategoryId' => 'required|exists:expense_categories,id',
+            'recurringConcept'    => 'required|string|max:255',
+            'recurringAmount'     => 'required|numeric|min:0.01',
+            'recurringTaxRate'    => 'required|numeric|min:0|max:100',
+            'recurringFrequency'  => 'required|in:monthly,quarterly,annual',
+        ]);
+
+        $payload = [
+            'expense_category_id' => $data['recurringCategoryId'],
+            'concept'             => $data['recurringConcept'],
+            'amount'              => (float) $data['recurringAmount'],
+            'tax_rate'            => (float) $data['recurringTaxRate'],
+            'frequency'           => $data['recurringFrequency'],
+        ];
+
+        if ($this->editingRecurringId) {
+            RecurringExpense::findOrFail($this->editingRecurringId)->update($payload);
+            Log::info('RecurringExpense updated', ['id' => $this->editingRecurringId]);
+        } else {
+            RecurringExpense::create($payload);
+            Log::info('RecurringExpense created', ['concept' => $payload['concept']]);
+        }
+
+        $this->closeRecurringModal();
+    }
+
+    public function toggleRecurring(int $id): void
+    {
+        $rec = RecurringExpense::findOrFail($id);
+        $rec->update(['is_active' => !$rec->is_active]);
+        Log::info('RecurringExpense toggled', ['id' => $id, 'active' => !$rec->is_active]);
+    }
+
+    public function deleteRecurring(int $id): void
+    {
+        RecurringExpense::findOrFail($id)->delete();
+        Log::info('RecurringExpense deleted', ['id' => $id]);
+    }
+
     public function render()
     {
+        // Auto-generar gastos fijos pendientes (throttled 1x/día)
+        RecurringExpense::generatePendingExpenses();
+
         $range = $this->getDateRange();
 
         $expenses = Expense::with('category')
@@ -217,8 +300,12 @@ class Expenses extends Component
         $total     = $totalBase + $totalTax;
 
         $categories = ExpenseCategory::orderBy('name')->get();
+        $recurringExpenses = RecurringExpense::with('category')
+            ->orderByDesc('is_active')
+            ->orderBy('concept')
+            ->get();
 
-        return view('livewire.expenses', compact('expenses', 'total', 'totalBase', 'totalTax', 'categories'));
+        return view('livewire.expenses', compact('expenses', 'total', 'totalBase', 'totalTax', 'categories', 'recurringExpenses'));
     }
 
     private function getDateRange(): array

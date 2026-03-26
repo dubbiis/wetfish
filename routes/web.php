@@ -26,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
             $pdf->setPaper('a4', 'portrait');
             return $pdf->download('WetFish-Informe-Coste-Real.pdf');
         })->name('reports.coste-real');
+        Route::get('/fiscal', \App\Livewire\FiscalEstimations::class)->name('fiscal');
         Route::get('/reports/manual-usuario', function () {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reports.manual-usuario');
             $pdf->setPaper('a4', 'portrait');

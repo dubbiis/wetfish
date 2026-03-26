@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\AiUsageLog;
 use App\Models\Expense;
+use App\Models\RecurringExpense;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Setting;
@@ -23,6 +24,9 @@ class Dashboard extends Component
 
     public function render()
     {
+        // Auto-generar gastos fijos pendientes (throttled 1x/día)
+        RecurringExpense::generatePendingExpenses();
+
         $range = $this->getDateRange();
 
         // Load all tickets in range

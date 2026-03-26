@@ -20,6 +20,7 @@ class ExpenseCategorySeeder extends Seeder
             ['name' => 'Gestoría',     'icon' => 'calculate'],
             ['name' => 'Mantenimiento','icon' => 'build'],
             ['name' => 'Limpieza',     'icon' => 'cleaning_services'],
+            ['name' => 'Cuota autónomo','icon' => 'badge'],
             ['name' => 'Otros',        'icon' => 'more_horiz'],
         ];
 

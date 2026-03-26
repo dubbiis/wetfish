@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Expense extends Model
 {
-    protected $fillable = ['expense_category_id', 'concept', 'amount', 'tax_rate', 'tax_amount', 'date', 'notes'];
+    protected $fillable = ['expense_category_id', 'concept', 'amount', 'tax_rate', 'tax_amount', 'date', 'notes', 'recurring_expense_id'];
 
     protected function casts(): array
     {
@@ -29,5 +29,10 @@ class Expense extends Model
     public function category()
     {
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
+    }
+
+    public function recurringExpense()
+    {
+        return $this->belongsTo(RecurringExpense::class);
     }
 }

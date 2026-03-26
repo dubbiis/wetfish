@@ -231,7 +231,10 @@
 
     <!-- ── Sección 4a: Resumen Fiscal (IVA) ── -->
     <div class="glass-card rounded-2xl p-4">
-        <p class="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">Resumen Fiscal</p>
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-xs font-bold uppercase tracking-widest text-white/40">Resumen Fiscal</p>
+            <a href="{{ route('fiscal') }}" class="text-xs text-primary font-medium hover:text-primary/80 transition-all">Ver modelos fiscales →</a>
+        </div>
         <div class="grid grid-cols-3 gap-3">
             <div class="space-y-1">
                 <p class="text-xs text-slate-400">IVA cobrado</p>
