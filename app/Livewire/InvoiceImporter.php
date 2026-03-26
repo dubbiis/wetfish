@@ -240,13 +240,17 @@ class InvoiceImporter extends Component
                 $product = Product::find($productId);
                 if ($product) {
                     $product->stock += $item['quantity'];
-                    $product->cost_price = $item['unit_cost'];
-                    if ($product->auto_margin) {
-                        $baseSalePrice = round($item['unit_cost'] * (1 + $marginPct / 100), 2);
-                        $product->base_sale_price = $baseSalePrice;
-                        $product->sale_price = $adjustmentActive
-                            ? round($baseSalePrice * (1 + $adjPct / 100), 2)
-                            : $baseSalePrice;
+                    // Usar siempre el precio MÁS ALTO entre proveedores
+                    $newCost = $item['unit_cost'];
+                    if ($newCost > (float) $product->cost_price) {
+                        $product->cost_price = $newCost;
+                        if ($product->auto_margin) {
+                            $baseSalePrice = round($newCost * (1 + $marginPct / 100), 2);
+                            $product->base_sale_price = $baseSalePrice;
+                            $product->sale_price = $adjustmentActive
+                                ? round($baseSalePrice * (1 + $adjPct / 100), 2)
+                                : $baseSalePrice;
+                        }
                     }
                     $product->save();
                 }
