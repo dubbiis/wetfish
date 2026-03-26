@@ -70,13 +70,17 @@ Devuelve EXCLUSIVAMENTE un JSON válido con esta estructura exacta, sin texto ad
   "supplier_name": "nombre de la empresa que factura o null",
   "base_amount": 0.00,
   "tax_rate": 21,
+  "tax_amount": 0.00,
+  "total": 0.00,
   "date": "YYYY-MM-DD o null",
   "category_hint": "luz"
 }
 
 Reglas:
-- base_amount es la BASE IMPONIBLE del IVA. Es el importe sobre el que se calcula el IVA. Búscala en la factura como "Base imponible", "Base IVA" o el importe junto al porcentaje de IVA.
-- tax_rate es el porcentaje de IVA (número entero: 21, 10, 4, 0).
+- base_amount es la suma de TODAS las bases imponibles de la factura (sin IVA).
+- tax_rate es el porcentaje de IVA dominante (número entero: 21, 10, 4, 0).
+- tax_amount es la suma REAL de todo el IVA de la factura (NO lo calcules, cópialo de la factura).
+- total es el TOTAL REAL de la factura tal como aparece en el documento (NO lo calcules, cópialo).
 
 IMPORTANTE para facturas de electricidad españolas:
 - Tienen estructura compleja: Término fijo + Energía + Servicios + Otros conceptos + Impuesto Eléctrico + IVA.
