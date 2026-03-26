@@ -75,8 +75,20 @@ Devuelve EXCLUSIVAMENTE un JSON válido con esta estructura exacta, sin texto ad
 }
 
 Reglas:
-- base_amount es el importe SIN IVA (base imponible). Si solo aparece el total, calcula la base dividiendo entre (1 + tax_rate/100).
-- tax_rate es el porcentaje de IVA (número entero: 21, 10, 4, 0). Electricidad y agua suelen tener 10%.
+- base_amount es la BASE IMPONIBLE del IVA. Es el importe sobre el que se calcula el IVA. Búscala en la factura como "Base imponible", "Base IVA" o el importe junto al porcentaje de IVA.
+- tax_rate es el porcentaje de IVA (número entero: 21, 10, 4, 0).
+
+IMPORTANTE para facturas de electricidad españolas:
+- Tienen estructura compleja: Término fijo + Energía + Servicios + Otros conceptos + Impuesto Eléctrico + IVA.
+- El "Impuesto Eléctrico" (~5.11%) NO es IVA. Se suma a la base antes de calcular el IVA.
+- Busca la línea "IVA (21%) de XXX" → ese XXX es la base_amount correcta.
+- Ejemplo: "IVA (21 %) de 291,92 → 61,30 €" → base_amount = 291.92, tax_rate = 21.
+- El total de la factura debe coincidir con base_amount + IVA.
+
+IMPORTANTE para facturas de agua:
+- Pueden tener IVA al 10% en consumo y 21% en otros conceptos.
+- Usa la base imponible total y el IVA total. Si hay dos bases con distinto IVA, suma las bases y calcula el IVA total como porcentaje medio.
+
 - category_hint debe ser una de: luz, agua, telefono, internet, alquiler, hosting, seguros, mantenimiento, otros.
 - date en formato YYYY-MM-DD. Si hay fecha de emisión y de vencimiento, usa la de emisión.
 - Responde SOLO con el JSON, sin bloques de código markdown ni texto adicional.
