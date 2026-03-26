@@ -45,6 +45,12 @@
                         <p class="text-slate-100 font-semibold leading-tight">{{ $product->name }}</p>
                     </div>
                     <p class="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">{{ $product->category?->name ?? 'Sin categoría' }}</p>
+                    @if($costPerUnit > 0 && $product->cost_price > 0)
+                    <p class="text-[10px] text-white/25 mt-0.5">
+                        Compra {{ number_format((float)$product->cost_price, 2, ',', '.') }}€
+                        → Real <span class="text-amber-400/70 font-semibold">{{ number_format((float)$product->cost_price + $costPerUnit, 2, ',', '.') }}€</span>
+                    </p>
+                    @endif
                 </div>
             </div>
             <div class="flex items-center gap-5">

@@ -2,9 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Models\Expense;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Setting;
+use Illuminate\Support\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
@@ -129,8 +132,27 @@ class ProductEdit extends Component
 
     public function render()
     {
+        // Calcular coste operativo por unidad (misma lógica que Dashboard)
+        $expensePeriod = Setting::get('expense_calculation_period', 'month');
+        $expenseRange = match ($expensePeriod) {
+            '3months' => ['start' => Carbon::now()->subMonths(3), 'end' => Carbon::now()],
+            '6months' => ['start' => Carbon::now()->subMonths(6), 'end' => Carbon::now()],
+            default   => ['start' => Carbon::now()->startOfMonth(), 'end' => Carbon::now()],
+        };
+
+        $totalExpenses = (float) Expense::whereBetween('date', [$expenseRange['start'], $expenseRange['end']])->sum('amount');
+        $totalTransport = (float) Invoice::where('type', 'purchase')
+            ->whereBetween('invoice_date', [$expenseRange['start'], $expenseRange['end']])
+            ->sum('transport_cost');
+        $totalUnits = (int) Product::where('stock', '>', 0)->sum('stock');
+        $costPerUnit = $totalUnits > 0 ? round(($totalExpenses + $totalTransport) / $totalUnits, 2) : 0;
+
+        $realCost = round((float) $this->cost_price + $costPerUnit, 2);
+
         return view('livewire.product-edit', [
             'categories' => Category::all(),
+            'costPerUnit' => $costPerUnit,
+            'realCost' => $realCost,
         ]);
     }
 }

@@ -76,6 +76,18 @@
                 </div>
             </div>
 
+            <!-- Coste real -->
+            @if($costPerUnit > 0 && $cost_price)
+            <div class="bg-white/5 rounded-xl p-3 space-y-1">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-white/40">Coste real de este producto</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold text-amber-400">&euro; {{ number_format($realCost, 2, ',', '.') }}</span>
+                    <span class="text-xs text-white/30">compra {{ number_format((float)$cost_price, 2, ',', '.') }} + gastos {{ number_format($costPerUnit, 2, ',', '.') }}</span>
+                </div>
+                <p class="text-[10px] text-white/30">Incluye luz, agua, alquiler y otros gastos repartidos entre las {{ \App\Models\Product::where('stock', '>', 0)->sum('stock') }} uds en stock</p>
+            </div>
+            @endif
+
             <!-- Auto margin toggle -->
             <label class="flex items-center gap-3 cursor-pointer">
                 <div class="relative">
