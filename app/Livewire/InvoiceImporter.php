@@ -92,6 +92,7 @@ class InvoiceImporter extends Component
 
             // Parse items
             $this->items = [];
+            $autoExtraCosts = 0;
             foreach ($data['items'] ?? [] as $aiItem) {
                 $item = [
                     'code' => $aiItem['code'] ?? '',
@@ -105,8 +106,16 @@ class InvoiceImporter extends Component
                 ];
                 $item['total'] = round($item['quantity'] * $item['unit_cost'], 2);
 
-                // Try to match: 1) alias proveedor, 2) código, 3) nombre
+                // Comprobar si este item fue excluido antes (desechable)
                 $supplierId = $this->supplier_id;
+                if (ProductSupplierAlias::isExcluded($supplierId, $item['code'] ?: null, $item['name'])) {
+                    // Auto-sumar a costes extra y no incluir como producto
+                    $autoExtraCosts += $item['total'];
+                    Log::info('Item auto-excluido (desechable)', ['name' => $item['name'], 'total' => $item['total']]);
+                    continue;
+                }
+
+                // Try to match: 1) alias proveedor, 2) código, 3) nombre
                 $match = ProductSupplierAlias::findProduct($supplierId, $item['code'] ?: null, $item['name']);
 
                 if (!$match && !empty($item['code'])) {
@@ -126,6 +135,12 @@ class InvoiceImporter extends Component
                 }
 
                 $match = null;
+            }
+
+            // Sumar costes de items auto-excluidos
+            if ($autoExtraCosts > 0) {
+                $this->extraCosts = (string) round((float) $this->extraCosts + $autoExtraCosts, 2);
+                Log::info('Items auto-excluidos sumados a costes extra', ['amount' => $autoExtraCosts]);
             }
 
             if (empty($this->items)) {
@@ -161,8 +176,24 @@ class InvoiceImporter extends Component
 
     public function removeItem(int $index): void
     {
+        $item = $this->items[$index];
+
+        // Sumar el coste del item eliminado a los costes extra
+        $this->extraCosts = (string) round((float) $this->extraCosts + $item['total'], 2);
+
+        // Recordar este item para auto-excluirlo en futuras importaciones
+        $supplierId = $this->supplier_id;
+        if ($supplierId && !empty($item['name'])) {
+            ProductSupplierAlias::updateOrCreate(
+                ['supplier_id' => $supplierId, 'supplier_name' => $item['name']],
+                ['product_id' => 0, 'supplier_code' => $item['code'] ?: null]
+            );
+        }
+
         array_splice($this->items, $index, 1);
         $this->items = array_values($this->items);
+
+        Log::info('Item eliminado y sumado a costes extra', ['name' => $item['name'], 'total' => $item['total']]);
     }
 
     public function toggleNewProduct(int $index): void
