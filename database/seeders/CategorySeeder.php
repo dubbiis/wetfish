@@ -15,6 +15,7 @@ class CategorySeeder extends Seeder
             ['name' => 'Accesorios', 'slug' => 'accesorios', 'icon' => 'category'],
             ['name' => 'Peces criadero', 'slug' => 'peces-criadero', 'icon' => 'water_drop'],
             ['name' => 'Plantas criadero', 'slug' => 'plantas-criadero', 'icon' => 'forest'],
+            ['name' => 'Comida', 'slug' => 'comida', 'icon' => 'restaurant'],
         ];
 
         foreach ($categories as $category) {

@@ -224,7 +224,7 @@
                     @else
                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-500/10 text-blue-400 text-xs font-medium">
                         <span class="material-symbols-outlined text-xs">add_circle</span>
-                        Producto nuevo — se creara
+                        Nuevo — {{ ucfirst(str_replace('-', ' ', $item['category'] ?? 'sin categoría')) }}
                     </span>
                     @endif
                     @if($item['matched_product_id'])

@@ -34,7 +34,8 @@ Devuelve EXCLUSIVAMENTE un JSON válido con esta estructura exacta, sin texto ad
       "code": "código/referencia del producto, cadena vacía si no hay",
       "name": "nombre completo del producto/planta/pez",
       "quantity": 1,
-      "unit_cost": 0.00
+      "unit_cost": 0.00,
+      "category": "peces|plantas|accesorios|comida|peces-criadero|plantas-criadero"
     }
   ]
 }
@@ -48,6 +49,12 @@ Reglas CRÍTICAS:
 - quantity debe ser un entero.
 - unit_cost debe ser un decimal con 2 decimales (usar punto como separador decimal, no coma).
 - NO incluyas líneas de transporte, embalaje (tray, etiquetas), totales o resúmenes como items de producto.
+- category DEBE ser una de estas opciones exactas: "peces", "plantas", "accesorios", "comida", "peces-criadero", "plantas-criadero".
+  - Plantas acuáticas (Anubias, Cryptocoryne, Echinodorus, Myriophyllum, Najas, Bucephalandra, musgo, etc.) → "plantas"
+  - Peces (Guppy, Neón, Ángel, Betta, Corydora, Pleco, etc.) → "peces"
+  - Accesorios (filtros, tubos, plomo, decoración, iluminación, calentadores, etc.) → "accesorios"
+  - Comida (escamas, pellets, artemia, spirulina, etc.) → "comida"
+  - Si la factura es de un criadero propio o indica "criadero", usar "peces-criadero" o "plantas-criadero".
 - El supplier_name es la empresa que EMITE la factura (ej: "TIVAMO UG"), NO el cliente.
 - En "summary" extrae TODOS los datos del resumen de la factura: subtotal de productos, descuento global, transporte (con detalle de cajas/bultos), otros costes, IVA (porcentaje y cantidad), y total final.
 - Responde SOLO con el JSON, sin bloques de código markdown ni texto adicional.

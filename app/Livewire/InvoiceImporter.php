@@ -100,6 +100,7 @@ class InvoiceImporter extends Component
                     'total' => 0,
                     'matched_product_id' => null,
                     'is_new' => true,
+                    'category' => $aiItem['category'] ?? 'accesorios',
                 ];
                 $item['total'] = round($item['quantity'] * $item['unit_cost'], 2);
 
@@ -218,9 +219,15 @@ class InvoiceImporter extends Component
                 $finalSalePrice = $adjustmentActive
                     ? round($baseSalePrice * (1 + $adjPct / 100), 2)
                     : $baseSalePrice;
+
+                // Resolver categoría por slug
+                $categorySlug = $item['category'] ?? 'accesorios';
+                $category = \App\Models\Category::where('slug', $categorySlug)->first();
+
                 $product = Product::create([
                     'code' => $item['code'] ?: null,
                     'name' => $item['name'],
+                    'category_id' => $category?->id,
                     'cost_price' => $item['unit_cost'],
                     'sale_price' => $finalSalePrice,
                     'base_sale_price' => $baseSalePrice,
