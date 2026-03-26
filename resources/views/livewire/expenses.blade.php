@@ -119,12 +119,13 @@
             <p class="text-slate-500 text-sm text-center py-2">No hay gastos fijos configurados</p>
             @endforelse
 
-            <button wire:click="openAddRecurring"
-                class="w-full h-10 rounded-xl border border-dashed border-white/10 text-white/40 text-sm font-medium flex items-center justify-center gap-2 hover:text-white hover:border-primary/30 transition-all">
-                <span class="material-symbols-outlined text-base">add</span>
-                Añadir gasto fijo
-            </button>
         </div>
+
+        <button wire:click="openAddRecurring"
+            class="w-full h-10 rounded-xl border border-dashed border-white/10 text-white/40 text-sm font-medium flex items-center justify-center gap-2 hover:text-white hover:border-primary/30 transition-all mt-2">
+            <span class="material-symbols-outlined text-base">add</span>
+            Añadir gasto fijo
+        </button>
     </div>
 
     <!-- Lista de gastos -->
