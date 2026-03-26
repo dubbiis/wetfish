@@ -85,9 +85,16 @@ IMPORTANTE para facturas de electricidad españolas:
 - Ejemplo: "IVA (21 %) de 291,92 → 61,30 €" → base_amount = 291.92, tax_rate = 21.
 - El total de la factura debe coincidir con base_amount + IVA.
 
-IMPORTANTE para facturas de agua:
-- Pueden tener IVA al 10% en consumo y 21% en otros conceptos.
-- Usa la base imponible total y el IVA total. Si hay dos bases con distinto IVA, suma las bases y calcula el IVA total como porcentaje medio.
+IMPORTANTE para facturas de agua en España:
+- Las facturas de agua suelen ser COMBINADAS: incluyen agua (EMACSA o similar) + basura/higiene (SADECO o similar) + Canon Autonómico en un ÚNICO documento.
+- DEBES sumar TODAS las partes como un solo gasto. No extraigas solo una parte.
+- Busca "TOTAL EN EUROS" al final del documento — ese es el importe total real.
+- Suma todas las bases imponibles de todas las secciones (agua + saneamiento + canon + higiene/basura).
+- Suma todos los importes de IVA de todas las secciones.
+- base_amount = suma de TODAS las bases (agua + saneamiento + canon + basura/higiene).
+- El IVA suele ser 10% en agua y basura, y 0% en el Canon Autonómico.
+- Usa tax_rate = 10 como aproximación (es el tipo dominante).
+- Ejemplo: EMACSA base 48,22€ + SADECO base 62,19€ = base_amount total 110,41€, tax_rate 10.
 
 - category_hint debe ser una de: luz, agua, telefono, internet, alquiler, hosting, seguros, mantenimiento, otros.
 - date en formato YYYY-MM-DD. Si hay fecha de emisión y de vencimiento, usa la de emisión.
