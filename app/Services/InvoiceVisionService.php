@@ -48,7 +48,13 @@ Reglas CRÍTICAS:
 - Los códigos pueden tener formato "11 3112", "22 1104", etc. Inclúyelos tal cual aparecen.
 - quantity debe ser un entero.
 - unit_cost debe ser un decimal con 2 decimales (usar punto como separador decimal, no coma).
-- NO incluyas líneas de transporte, embalaje (tray, etiquetas), totales o resúmenes como items de producto.
+- NO incluyas como items de producto las siguientes líneas. En su lugar, SUMA su coste a "other_costs" en el summary:
+  - Cajas, bandejas, trays (ej: "Black tray", "tray", "caja")
+  - Etiquetas (ej: "Etikett", "etiqueta", "label")
+  - Parches de calor, heat packs (ej: "Heat Pack", "Parche calor")
+  - Packing, embalaje, bolsas
+  - Líneas de totales, subtotales o resúmenes
+  - Transporte (ya va en transport_cost)
 - category DEBE ser una de estas opciones exactas: "peces", "plantas", "accesorios", "comida", "peces-criadero", "plantas-criadero".
   - Plantas acuáticas (Anubias, Cryptocoryne, Echinodorus, Myriophyllum, Najas, Bucephalandra, musgo, etc.) → "plantas"
   - Peces (Guppy, Neón, Ángel, Betta, Corydora, Pleco, etc.) → "peces"
