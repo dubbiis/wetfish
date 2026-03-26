@@ -77,6 +77,14 @@ class PointOfSale extends Component
         $this->cart[$index]['subtotal'] = round($this->cart[$index]['quantity'] * $this->cart[$index]['price'], 2);
     }
 
+    public function updatePrice(int $index, $price): void
+    {
+        $price = (float) $price;
+        if ($price < 0) $price = 0;
+        $this->cart[$index]['price'] = round($price, 2);
+        $this->cart[$index]['subtotal'] = round($this->cart[$index]['quantity'] * $price, 2);
+    }
+
     public function removeFromCart(int $index): void
     {
         unset($this->cart[$index]);

@@ -71,7 +71,19 @@
             <div class="p-3 flex items-center gap-3">
                 <div class="flex-1 min-w-0">
                     <p class="text-slate-100 text-sm font-medium truncate">{{ $item['name'] }}</p>
-                    <p class="text-white/30 text-xs">&euro; {{ number_format($item['price'], 2, ',', '.') }} /ud</p>
+                    <div class="flex items-center gap-1 mt-0.5" x-data="{ editing: false }">
+                        <span x-show="!editing" @click="editing = true" class="text-white/30 text-xs cursor-pointer hover:text-primary transition-all" title="Pulsa para cambiar precio">
+                            &euro; {{ number_format($item['price'], 2, ',', '.') }} /ud
+                        </span>
+                        <input x-show="editing" x-cloak
+                            type="number" step="0.01" min="0"
+                            value="{{ $item['price'] }}"
+                            @blur="editing = false; $wire.updatePrice({{ $index }}, $event.target.value)"
+                            @keydown.enter="editing = false; $wire.updatePrice({{ $index }}, $event.target.value)"
+                            x-ref="priceInput"
+                            x-init="$watch('editing', v => { if(v) $nextTick(() => $refs.priceInput.select()) })"
+                            class="w-20 h-6 px-2 bg-white/10 border border-primary/30 rounded text-xs text-primary font-bold focus:ring-1 focus:ring-primary/50 focus:outline-none">
+                    </div>
                 </div>
                 <div class="flex items-center gap-1">
                     <button wire:click="decrementQty({{ $index }})"
