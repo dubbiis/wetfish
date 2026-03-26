@@ -105,6 +105,7 @@
                             + {{ number_format($rec->tax_rate, 0) }}% IVA
                         @endif
                         · <span class="text-primary/80">{{ $rec->frequency_label }}</span>
+                        · día {{ $rec->day_of_month ?? 1 }}
                     </p>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
@@ -376,18 +377,37 @@
                     </div>
                 </div>
 
-                <div class="pb-2">
-                    <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Frecuencia</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        @foreach(['monthly' => 'Mensual', 'quarterly' => 'Trimestral', 'annual' => 'Anual'] as $val => $lbl)
-                        <button type="button" wire:click="$set('recurringFrequency', '{{ $val }}')"
-                            class="h-11 rounded-xl font-medium text-sm transition-all
-                            {{ $recurringFrequency === $val ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white/5 border border-white/10 text-slate-300' }}">
-                            {{ $lbl }}
-                        </button>
-                        @endforeach
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Frecuencia</label>
+                        <div class="grid grid-cols-3 gap-1">
+                            @foreach(['monthly' => 'Mes', 'quarterly' => 'Trim.', 'annual' => 'Año'] as $val => $lbl)
+                            <button type="button" wire:click="$set('recurringFrequency', '{{ $val }}')"
+                                class="h-10 rounded-lg font-medium text-xs transition-all
+                                {{ $recurringFrequency === $val ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white/5 border border-white/10 text-slate-300' }}">
+                                {{ $lbl }}
+                            </button>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Día de cobro</label>
+                        <input wire:model="recurringDayOfMonth" type="number" min="1" max="31"
+                            class="w-full h-10 px-4 bg-white/5 border border-white/10 rounded-lg text-slate-100 text-center focus:ring-1 focus:ring-primary/50">
+                        @error('recurringDayOfMonth') <p class="text-rose-400 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
+
+                @if(!$editingRecurringId)
+                <label class="flex items-center gap-3 cursor-pointer pb-1">
+                    <div class="relative">
+                        <input type="checkbox" wire:model="recurringIncludeCurrentMonth" class="sr-only">
+                        <div class="w-11 h-6 rounded-full transition-colors {{ $recurringIncludeCurrentMonth ? 'bg-primary' : 'bg-white/10' }}"></div>
+                        <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform {{ $recurringIncludeCurrentMonth ? 'translate-x-5' : '' }}"></div>
+                    </div>
+                    <span class="text-sm text-slate-300">Incluir mes actual</span>
+                </label>
+                @endif
             </div>
 
             <div class="p-5 pt-4 shrink-0">

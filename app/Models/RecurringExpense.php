@@ -10,7 +10,7 @@ class RecurringExpense extends Model
 {
     protected $fillable = [
         'expense_category_id', 'concept', 'amount', 'tax_rate',
-        'frequency', 'is_active', 'last_generated_at',
+        'frequency', 'day_of_month', 'is_active', 'last_generated_at',
     ];
 
     protected function casts(): array

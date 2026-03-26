@@ -53,6 +53,8 @@ class Expenses extends Component
     public string $recurringAmount      = '';
     public string $recurringTaxRate     = '0';
     public string $recurringFrequency   = 'monthly';
+    public string $recurringDayOfMonth  = '1';
+    public bool   $recurringIncludeCurrentMonth = true;
 
     public function setPeriod(string $period): void
     {
@@ -235,9 +237,11 @@ class Expenses extends Component
 
     public function openAddRecurring(): void
     {
-        $this->reset('editingRecurringId', 'recurringCategoryId', 'recurringConcept', 'recurringAmount', 'recurringTaxRate', 'recurringFrequency');
+        $this->reset('editingRecurringId', 'recurringCategoryId', 'recurringConcept', 'recurringAmount', 'recurringTaxRate', 'recurringFrequency', 'recurringDayOfMonth');
         $this->recurringTaxRate    = '0';
         $this->recurringFrequency  = 'monthly';
+        $this->recurringDayOfMonth = '1';
+        $this->recurringIncludeCurrentMonth = true;
         $this->showRecurringModal  = true;
     }
 
@@ -250,6 +254,8 @@ class Expenses extends Component
         $this->recurringAmount     = (string) $rec->amount;
         $this->recurringTaxRate    = (string) $rec->tax_rate;
         $this->recurringFrequency  = $rec->frequency;
+        $this->recurringDayOfMonth = (string) ($rec->day_of_month ?? 1);
+        $this->recurringIncludeCurrentMonth = false;
         $this->showRecurringModal  = true;
     }
 
@@ -267,6 +273,7 @@ class Expenses extends Component
             'recurringAmount'     => 'required|numeric|min:0.01',
             'recurringTaxRate'    => 'required|numeric|min:0|max:100',
             'recurringFrequency'  => 'required|in:monthly,quarterly,annual',
+            'recurringDayOfMonth' => 'required|integer|min:1|max:31',
         ]);
 
         $payload = [
@@ -275,13 +282,35 @@ class Expenses extends Component
             'amount'              => (float) $data['recurringAmount'],
             'tax_rate'            => (float) $data['recurringTaxRate'],
             'frequency'           => $data['recurringFrequency'],
+            'day_of_month'        => (int) $data['recurringDayOfMonth'],
         ];
 
         if ($this->editingRecurringId) {
             RecurringExpense::findOrFail($this->editingRecurringId)->update($payload);
             Log::info('RecurringExpense updated', ['id' => $this->editingRecurringId]);
         } else {
-            RecurringExpense::create($payload);
+            $rec = RecurringExpense::create($payload);
+
+            // Si incluye mes actual, generar el gasto inmediatamente
+            if ($this->recurringIncludeCurrentMonth) {
+                $date = now()->startOfMonth()->day(min((int) $data['recurringDayOfMonth'], now()->daysInMonth));
+                $taxAmount = round((float) $data['recurringAmount'] * (float) $data['recurringTaxRate'] / 100, 2);
+
+                Expense::create([
+                    'expense_category_id' => $data['recurringCategoryId'],
+                    'concept'             => $data['recurringConcept'],
+                    'amount'              => (float) $data['recurringAmount'],
+                    'tax_rate'            => (float) $data['recurringTaxRate'],
+                    'tax_amount'          => $taxAmount,
+                    'date'                => $date->toDateString(),
+                    'notes'               => 'Generado automáticamente (gasto fijo)',
+                    'recurring_expense_id' => $rec->id,
+                ]);
+
+                $rec->update(['last_generated_at' => now()->toDateString()]);
+                Log::info('RecurringExpense: gasto del mes actual generado', ['concept' => $payload['concept']]);
+            }
+
             Log::info('RecurringExpense created', ['concept' => $payload['concept']]);
         }
 
