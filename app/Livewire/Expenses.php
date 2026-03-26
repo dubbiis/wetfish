@@ -21,6 +21,8 @@ class Expenses extends Component
     use WithPagination, WithFileUploads;
 
     public string $period = 'month';
+    public string $dateFrom = '';
+    public string $dateTo = '';
 
     // Modal añadir/editar gasto
     public bool   $showAddModal = false;
@@ -330,6 +332,10 @@ class Expenses extends Component
             'week'  => ['start' => Carbon::now()->startOfWeek(), 'end' => Carbon::now()],
             'month' => ['start' => Carbon::now()->startOfMonth(), 'end' => Carbon::now()],
             'year'  => ['start' => Carbon::now()->startOfYear(), 'end' => Carbon::now()],
+            'custom' => [
+                'start' => $this->dateFrom ? Carbon::parse($this->dateFrom)->startOfDay() : Carbon::now()->startOfMonth(),
+                'end'   => $this->dateTo ? Carbon::parse($this->dateTo)->endOfDay() : Carbon::now(),
+            ],
             'all'   => ['start' => Carbon::create(2020, 1, 1), 'end' => Carbon::now()],
             default => ['start' => Carbon::now()->startOfMonth(), 'end' => Carbon::now()],
         };

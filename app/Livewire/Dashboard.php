@@ -180,6 +180,28 @@ class Dashboard extends Component
         $aiCostMonth  = $aiUsageMonth->sum('cost_eur');
         $aiCallsMonth = $aiUsageMonth->count();
 
+        // Ventas diarias para sparkline (últimos 7 días o según período)
+        $dailySales = $allTickets->groupBy(fn($t) => $t->created_at->format('Y-m-d'))
+            ->map(fn($day) => round($day->sum('total'), 2))
+            ->toArray();
+        // Rellenar días sin ventas con 0
+        $period_start = $range['start']->copy();
+        $period_end = min($range['end']->copy(), now());
+        $days = [];
+        $current = $period_start->copy();
+        $maxDays = 30; // limitar a 30 barras máx
+        $totalDays = $period_start->diffInDays($period_end);
+        if ($totalDays > $maxDays) {
+            $current = $period_end->copy()->subDays($maxDays);
+        }
+        while ($current->lte($period_end)) {
+            $key = $current->format('Y-m-d');
+            $days[$key] = $dailySales[$key] ?? 0;
+            $current->addDay();
+        }
+        $sparklineData = array_values($days);
+        $sparklineLabels = array_map(fn($d) => \Carbon\Carbon::parse($d)->format('d'), array_keys($days));
+
         Log::info('Dashboard rendered', ['period' => $this->period, 'revenue' => $revenue, 'realMarginPct' => $realMarginPct]);
 
         return view('livewire.dashboard', compact(
@@ -192,7 +214,8 @@ class Dashboard extends Component
             'expensesByCategory', 'peakHour', 'bestDay',
             'realMarginPct', 'targetMarginPct', 'costPerUnit', 'totalUnitsInStock',
             'expensePeriodLabel', 'showPeakSuggestion', 'suggestedAdjustment', 'priceAdjustmentActive',
-            'aiTokensIn', 'aiTokensOut', 'aiCostMonth', 'aiCallsMonth'
+            'aiTokensIn', 'aiTokensOut', 'aiCostMonth', 'aiCallsMonth',
+            'sparklineData', 'sparklineLabels'
         ));
     }
 

@@ -16,7 +16,7 @@
 
     <!-- Period Filter -->
     <div class="flex gap-2 overflow-x-auto no-scrollbar">
-        @foreach(['week' => 'Semana', 'month' => 'Mes', 'year' => 'Año', 'all' => 'Todo'] as $key => $label)
+        @foreach(['week' => 'Semana', 'month' => 'Mes', 'year' => 'Año', 'custom' => 'Personalizado', 'all' => 'Todo'] as $key => $label)
         <button wire:click="setPeriod('{{ $key }}')"
             class="px-5 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap
             {{ $period === $key ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white/5 border border-white/10 text-slate-300' }}">
@@ -24,6 +24,15 @@
         </button>
         @endforeach
     </div>
+
+    @if($period === 'custom')
+    <div class="flex gap-3">
+        <input wire:model.live="dateFrom" type="date"
+            class="flex-1 h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:ring-1 focus:ring-primary/50">
+        <input wire:model.live="dateTo" type="date"
+            class="flex-1 h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:ring-1 focus:ring-primary/50">
+    </div>
+    @endif
 
     <!-- Total -->
     <div class="glass rounded-xl p-6 relative overflow-hidden">

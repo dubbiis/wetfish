@@ -17,12 +17,27 @@
         <p class="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">Ventas</p>
         <div class="space-y-1">
             <p class="text-slate-400 text-sm">Ingresos totales</p>
-            <h2 class="text-5xl font-bold text-white tracking-tight">€ {{ number_format($revenue, 2, ',', '.') }}</h2>
+            <h2 class="text-5xl font-bold text-white tracking-tight">&euro; {{ number_format($revenue, 2, ',', '.') }}</h2>
         </div>
         <div class="mt-3 flex items-center gap-2 {{ $netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400' }} font-semibold">
             <span class="material-symbols-outlined text-sm">{{ $netProfit >= 0 ? 'trending_up' : 'trending_down' }}</span>
-            <span class="text-sm">Beneficio neto: € {{ number_format($netProfit, 2, ',', '.') }} ({{ $marginPct }}%)</span>
+            <span class="text-sm">Beneficio neto: &euro; {{ number_format($netProfit, 2, ',', '.') }} ({{ $marginPct }}%)</span>
         </div>
+        <!-- Sparkline ventas diarias -->
+        @if(count($sparklineData) > 1)
+        @php $sparkMax = max($sparklineData) ?: 1; @endphp
+        <div class="mt-4 flex items-end gap-[2px] h-12">
+            @foreach($sparklineData as $i => $val)
+            <div class="flex-1 rounded-t transition-all {{ $val > 0 ? 'bg-primary/40' : 'bg-white/5' }}"
+                style="height: {{ max(round($val / $sparkMax * 100), 4) }}%"
+                title="{{ $sparklineLabels[$i] ?? '' }}: € {{ number_format($val, 2, ',', '.') }}"></div>
+            @endforeach
+        </div>
+        <div class="flex justify-between mt-1">
+            <span class="text-[9px] text-white/20">{{ $sparklineLabels[0] ?? '' }}</span>
+            <span class="text-[9px] text-white/20">{{ end($sparklineLabels) ?: '' }}</span>
+        </div>
+        @endif
         <div class="absolute -bottom-12 -right-12 h-48 w-48 bg-primary/20 blur-3xl rounded-full"></div>
     </a>
 
@@ -195,22 +210,47 @@
     <!-- ── Sección 4: Costes vs Ingresos ── -->
     <div class="glass-card rounded-2xl p-4">
         <p class="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">Costes vs Ingresos</p>
-        <div class="grid grid-cols-2 gap-3">
-            <div class="space-y-1">
-                <p class="text-xs text-slate-400">Ingresos</p>
-                <p class="text-xl font-bold text-emerald-400">&euro; {{ number_format($revenue, 2, ',', '.') }}</p>
+
+        <!-- Gráfico de barras horizontal -->
+        @php
+            $costMax = max($revenue, $purchaseCosts, $serviceCosts, $operationalCosts) ?: 1;
+        @endphp
+        <div class="space-y-3 mb-4">
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-emerald-400">Ingresos</span>
+                    <span class="text-emerald-400 font-bold">&euro; {{ number_format($revenue, 2, ',', '.') }}</span>
+                </div>
+                <div class="h-3 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-emerald-500/60 rounded-full transition-all" style="width: {{ round($revenue / $costMax * 100) }}%"></div>
+                </div>
             </div>
-            <div class="space-y-1">
-                <p class="text-xs text-slate-400">Compras</p>
-                <p class="text-xl font-bold text-rose-400">&euro; {{ number_format($purchaseCosts, 2, ',', '.') }}</p>
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-rose-400">Compras</span>
+                    <span class="text-rose-400 font-bold">&euro; {{ number_format($purchaseCosts, 2, ',', '.') }}</span>
+                </div>
+                <div class="h-3 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-rose-500/60 rounded-full transition-all" style="width: {{ round($purchaseCosts / $costMax * 100) }}%"></div>
+                </div>
             </div>
-            <div class="space-y-1">
-                <p class="text-xs text-slate-400">Servicios</p>
-                <p class="text-xl font-bold text-orange-400">&euro; {{ number_format($serviceCosts, 2, ',', '.') }}</p>
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-orange-400">Servicios</span>
+                    <span class="text-orange-400 font-bold">&euro; {{ number_format($serviceCosts, 2, ',', '.') }}</span>
+                </div>
+                <div class="h-3 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-orange-500/60 rounded-full transition-all" style="width: {{ round($serviceCosts / $costMax * 100) }}%"></div>
+                </div>
             </div>
-            <div class="space-y-1">
-                <p class="text-xs text-slate-400">Gastos op. (base)</p>
-                <p class="text-xl font-bold text-amber-400">&euro; {{ number_format($operationalCosts, 2, ',', '.') }}</p>
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-amber-400">Gastos operativos</span>
+                    <span class="text-amber-400 font-bold">&euro; {{ number_format($operationalCosts, 2, ',', '.') }}</span>
+                </div>
+                <div class="h-3 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-amber-500/60 rounded-full transition-all" style="width: {{ round($operationalCosts / $costMax * 100) }}%"></div>
+                </div>
             </div>
         </div>
 
