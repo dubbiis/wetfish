@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Product;
+use App\Models\ProductSupplierAlias;
 use App\Models\Supplier;
 use App\Models\Setting;
 use App\Services\InvoiceVisionService;
@@ -104,11 +105,14 @@ class InvoiceImporter extends Component
                 ];
                 $item['total'] = round($item['quantity'] * $item['unit_cost'], 2);
 
-                // Try to match existing product by code or name
-                if (!empty($item['code'])) {
+                // Try to match: 1) alias proveedor, 2) código, 3) nombre
+                $supplierId = $this->supplier_id;
+                $match = ProductSupplierAlias::findProduct($supplierId, $item['code'] ?: null, $item['name']);
+
+                if (!$match && !empty($item['code'])) {
                     $match = Product::where('code', $item['code'])->first();
                 }
-                if (!isset($match) || !$match) {
+                if (!$match) {
                     $match = Product::where('name', 'like', '%' . $item['name'] . '%')->first();
                 }
 
@@ -266,6 +270,11 @@ class InvoiceImporter extends Component
                 'total' => $item['total'],
                 'is_new_product' => $item['is_new'],
             ]);
+
+            // Guardar alias proveedor ↔ producto para matching automático futuro
+            if ($productId && $supplierId) {
+                ProductSupplierAlias::saveAlias($productId, $supplierId, $item['code'] ?: null, $item['name']);
+            }
         }
 
         session()->flash('message', 'Factura importada correctamente. ' . count($this->items) . ' productos procesados.');
