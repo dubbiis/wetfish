@@ -35,7 +35,8 @@ class Expenses extends Component
     // IA scan
     public $expenseFile;
     public bool $processingExpense = false;
-    public ?float $aiTaxAmount = null; // IVA real extraído por IA (para facturas con IVA mixto)
+    public ?float $aiTaxAmount = null; // IVA real extraído por IA
+    public ?float $aiTotal = null;     // Total real extraído por IA
 
     // Modal gestionar categorías
     public bool   $showCategoryModal = false;
@@ -88,8 +89,9 @@ class Expenses extends Component
             $this->taxRate = (string) ($data['tax_rate'] ?? '21');
             $this->date    = $data['date'] ?? now()->toDateString();
 
-            // Si la IA devuelve tax_amount real, guardarlo para usarlo en vez de recalcular
+            // Usar IVA y total reales de la factura (no recalcular)
             $this->aiTaxAmount = isset($data['tax_amount']) ? (float) $data['tax_amount'] : null;
+            $this->aiTotal = isset($data['total']) ? (float) $data['total'] : null;
 
             // Try to match category by hint
             $hint = $data['category_hint'] ?? '';
@@ -132,6 +134,7 @@ class Expenses extends Component
     {
         $this->showAddModal = false;
         $this->aiTaxAmount = null;
+        $this->aiTotal = null;
         $this->resetValidation();
     }
 
