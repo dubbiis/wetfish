@@ -81,7 +81,7 @@
             <span class="material-symbols-outlined text-white/30 transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
         </button>
 
-        <div x-show="open" x-collapse class="space-y-2 mt-2">
+        <div x-show="open" x-transition class="space-y-2 mt-2">
             @forelse($recurringExpenses as $rec)
             <div class="glass-card rounded-xl p-4 flex items-center gap-3 {{ !$rec->is_active ? 'opacity-40' : '' }}">
                 <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">

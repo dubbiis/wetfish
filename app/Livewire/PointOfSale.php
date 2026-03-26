@@ -154,7 +154,7 @@ class PointOfSale extends Component
         }
 
         $this->clearCart();
-        $this->redirect(route('tickets'), navigate: true);
+        return $this->redirect(route('tickets'));
     }
 
     public function render()

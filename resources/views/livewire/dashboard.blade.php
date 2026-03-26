@@ -13,7 +13,7 @@
     </div>
 
     <!-- ── Sección 1: Métricas de ventas ── -->
-    <div class="glass rounded-xl p-6 relative overflow-hidden">
+    <a href="{{ route('tickets') }}" class="glass rounded-xl p-6 relative overflow-hidden block">
         <p class="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">Ventas</p>
         <div class="space-y-1">
             <p class="text-slate-400 text-sm">Ingresos totales</p>
@@ -24,25 +24,25 @@
             <span class="text-sm">Beneficio neto: € {{ number_format($netProfit, 2, ',', '.') }} ({{ $marginPct }}%)</span>
         </div>
         <div class="absolute -bottom-12 -right-12 h-48 w-48 bg-primary/20 blur-3xl rounded-full"></div>
-    </div>
+    </a>
 
     <div class="grid grid-cols-2 gap-3">
-        <div class="glass p-4 rounded-xl space-y-1">
+        <a href="{{ route('tickets') }}" class="glass p-4 rounded-xl space-y-1 block">
             <p class="text-xs text-slate-400">Tickets</p>
             <p class="text-2xl font-bold text-white">{{ $ticketCount }}</p>
-        </div>
-        <div class="glass p-4 rounded-xl space-y-1">
+        </a>
+        <a href="{{ route('tickets') }}" class="glass p-4 rounded-xl space-y-1 block">
             <p class="text-xs text-slate-400">Ticket promedio</p>
             <p class="text-2xl font-bold text-white">€ {{ number_format($avgTicket, 2, ',', '.') }}</p>
-        </div>
-        <div class="glass p-4 rounded-xl space-y-1">
+        </a>
+        <a href="{{ route('stock') }}" class="glass p-4 rounded-xl space-y-1 block">
             <p class="text-xs text-slate-400">Unidades vendidas</p>
             <p class="text-2xl font-bold text-white">{{ $unitsSold }}</p>
-        </div>
-        <div class="glass p-4 rounded-xl space-y-1">
+        </a>
+        <a href="{{ route('tickets') }}" class="glass p-4 rounded-xl space-y-1 block">
             <p class="text-xs text-slate-400">Mejor ticket</p>
             <p class="text-2xl font-bold text-white">€ {{ number_format($maxTicket, 2, ',', '.') }}</p>
-        </div>
+        </a>
     </div>
 
     <!-- ── Sección 1b: Margen Real vs Objetivo ── -->
@@ -286,7 +286,7 @@
     </div>
 
     <!-- ── Sección 5: Inventario ── -->
-    <div class="glass-card rounded-2xl p-4">
+    <a href="{{ route('stock') }}" class="glass-card rounded-2xl p-4 block">
         <p class="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">Inventario</p>
         <div class="grid grid-cols-3 gap-3">
             <div class="space-y-1">
@@ -308,7 +308,7 @@
             Ver productos con stock crítico
         </a>
         @endif
-    </div>
+    </a>
 
     <!-- ── Sección 6: Actividad ── -->
     <div class="glass-card rounded-2xl p-4 pb-safe">
