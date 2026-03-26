@@ -354,10 +354,28 @@
             </div>
         </div>
         @if($criticalProducts > 0)
-        <a href="{{ route('stock') }}" class="mt-4 flex items-center gap-2 text-rose-400 text-sm font-medium">
-            <span class="material-symbols-outlined text-base">warning</span>
-            Ver productos con stock crítico
-        </a>
+        <div x-data="{ open: false }" class="mt-4">
+            <button @click="open = !open" class="flex items-center gap-2 text-rose-400 text-sm font-medium w-full">
+                <span class="material-symbols-outlined text-base">warning</span>
+                {{ $criticalProducts }} productos con stock crítico
+                <span class="material-symbols-outlined text-sm ml-auto transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
+            </button>
+            <div x-show="open" x-transition class="mt-3 space-y-2">
+                @foreach($criticalProductList as $cp)
+                <a href="{{ route('stock.edit', ['productId' => $cp->id]) }}"
+                    class="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-primary/10 transition-all">
+                    <div>
+                        <p class="text-sm text-slate-200 font-medium">{{ $cp->name }}</p>
+                        <p class="text-[10px] text-white/30">{{ $cp->category?->name ?? 'Sin categoría' }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-bold {{ $cp->stock <= 0 ? 'text-rose-400' : 'text-amber-400' }}">{{ $cp->stock }}</p>
+                        <p class="text-[10px] text-white/30">mín. {{ $cp->min_stock }}</p>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
         @endif
     </a>
 

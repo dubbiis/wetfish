@@ -96,6 +96,7 @@ class Dashboard extends Component
 
         // Stock & inventory
         $criticalProducts  = Product::whereColumn('stock', '<=', 'min_stock')->count();
+        $criticalProductList = Product::with('category')->whereColumn('stock', '<=', 'min_stock')->orderBy('stock')->get();
         $inventoryValue    = Product::selectRaw('SUM(stock * cost_price) as total')->value('total') ?? 0;
 
         // Merma en el período
@@ -214,7 +215,7 @@ class Dashboard extends Component
             'maxTicket', 'lastTicket', 'purchaseCosts', 'purchaseTransport', 'purchaseVat', 'serviceCosts',
             'operationalCosts', 'operationalTotal', 'operationalTax', 'marginPct', 'marginPctWithTax',
             'ivaRepercutido', 'ivaSoportado', 'ivaBalance',
-            'criticalProducts', 'inventoryValue', 'inactiveProducts', 'lossUnits', 'lossCost',
+            'criticalProducts', 'criticalProductList', 'inventoryValue', 'inactiveProducts', 'lossUnits', 'lossCost',
             'topProductsByQty', 'topProductsByRevenue', 'salesByCategory',
             'expensesByCategory', 'peakHour', 'bestDay',
             'realMarginPct', 'targetMarginPct', 'costPerUnit', 'totalUnitsInStock',
