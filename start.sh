@@ -57,14 +57,6 @@ php artisan migrate --force && echo "       OK" || echo "       WARNING: issues"
 echo "[6/7] Running seeders..."
 php artisan db:seed --force && echo "       OK" || echo "       WARNING: issues"
 
-# === TEMPORAL: Borrar productos de prueba Pez 1-10 ===
-echo "[TEMP] Borrando productos de prueba..."
-php artisan tinker --execute="
-\$count = \App\Models\Product::where('name', 'like', 'Pez %')->delete();
-echo \"Eliminados: \$count productos Pez de prueba\";
-" 2>&1
-# === FIN TEMPORAL ===
-
 # Verify assets
 echo "[7/7] Verifying build..."
 echo "       public_html contents:"
