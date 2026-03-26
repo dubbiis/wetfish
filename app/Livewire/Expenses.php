@@ -83,15 +83,20 @@ class Expenses extends Component
             $service = app(InvoiceVisionService::class);
             $data = $service->extractExpense($path, $mimeType);
 
-            // Auto-fill form fields
-            $this->concept = $data['concept'] ?? '';
-            $this->amount  = (string) ($data['base_amount'] ?? '');
-            $this->taxRate = (string) ($data['tax_rate'] ?? '21');
-            $this->date    = $data['date'] ?? now()->toDateString();
-
-            // Usar IVA y total reales de la factura (no recalcular)
+            // Usar total y tax_amount reales de la factura
             $this->aiTaxAmount = isset($data['tax_amount']) ? (float) $data['tax_amount'] : null;
             $this->aiTotal = isset($data['total']) ? (float) $data['total'] : null;
+
+            // Calcular base = total - IVA (más fiable que la base que devuelve la IA)
+            if ($this->aiTotal !== null && $this->aiTaxAmount !== null) {
+                $this->amount = (string) round($this->aiTotal - $this->aiTaxAmount, 2);
+            } else {
+                $this->amount = (string) ($data['base_amount'] ?? '');
+            }
+
+            $this->concept = $data['concept'] ?? '';
+            $this->taxRate = (string) ($data['tax_rate'] ?? '21');
+            $this->date    = $data['date'] ?? now()->toDateString();
 
             // Try to match category by hint
             $hint = $data['category_hint'] ?? '';
